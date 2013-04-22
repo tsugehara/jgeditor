@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>jgeditor</title>
+<style type="text/css" media="screen">
+#editor { 
+	width:500px;
+	height:500px;
+}
+.game-container {
+	min-width:500px;
+	min-height:500px;
+	padding:0;
+	margin:0;
+	border:0;
+}
+#error-console {
+	width:500px;
+	height:120px;
+}
+#output {
+	width:500px;
+	height:120px;
+}
+.l {
+	float:left;
+}
+.r {
+	float:right;
+}
+.c {
+	clear:both;
+}
+</style>
+<script type="text/javascript" src="js//ts/typescript.js"></script>
+<script type="text/javascript" src="js/ace/ace.js"></script>
+<script type="text/javascript" src="js/editor.jgame.js"></script>
+<script type="text/javascript" src="js/jgame.js"></script>
+<script type="text/javascript">
+var editor;
+(function() {
+window.onload = function() {
+	editor = ace.edit("editor");
+	editor.setTheme("ace/theme/monokai");
+	editor.getSession().setMode("ace/mode/javascript");
+
+	var f = window.editorFunc = {}
+
+	f.run = function() {
+		var prog = editor.getValue();;
+		if (! prog) {
+			alert("コードが存在しません。");
+			return;
+		}
+		var request = new XMLHttpRequest();
+		request.open("POST", "save.php");
+		request.send(prog);
+		request.onload = function() {
+			document.getElementById("jgame-con").src = "load.php?"+(new Date()).getTime();
+		}
+		request.onerror = function() {
+
+		}
+	}
+	f.stop = function() {
+		document.getElementById("jgame-con").src = "about:blank"
+	}
+
+    editor.commands.addCommands([{
+        name: "run",
+        bindKey: "Ctrl-R",
+        exec: f.run
+    }]);
+    editor.commands.addCommands([{
+        name: "stop",
+        bindKey: "Ctrl-Shift-R",
+        exec: f.stop
+    }]);
+
+}
+})();
+</script>
+</head>
+<body>
+<div>
+	<div id="editor" class="l">window.onload = function() {
+    var game = new jg.Game(480, 480);
+    game.preload({logo: "http://jgame-js.sourceforge.jp/img/logo-m.png"});
+    game.loaded.handle(function() {
+        var logo = new jg.Sprite(game.r("logo"));
+        logo.moveTo(
+            game.width / 2 - logo.width / 2,
+            game.height / 2 - logo.height / 2
+        );
+        game.scene.append(logo);
+        var shapes = [];
+        for (var i=0; i&lt;50; i++) {
+            var shape = new jg.Shape(32, 32, jg.ShapeStyle.Fill);
+            shapes.push(shape);
+            game.scene.append(shape);
+        }
+
+        var r = function() {return game.random(0,480-32); }
+        var r2 = function() { return game.random(0, 360); }
+        for (i=0; i&lt;shapes.length; i++) {
+            shapes[i].tl().tween({
+                x: r,
+                y: r,
+                rotate: r2,
+                time: 1000
+            }).loop()
+        }
+    });	
+}</div>
+	<div class="l game-container">
+		<iframe id="jgame-con" class="game-container"></iframe>
+	</div>
+	<div class="c"></div>
+</div>
+<div>
+	<input type="button" value="実行(Ctrl+R)" onclick="window.editorFunc.run()" />
+	<input type="button" value="停止(Ctrl+Shift+R)" onclick="window.editorFunc.stop()" />
+</div>
+<div>
+	<p>
+		<a href="http://jgame-js.sourceforge.jp/">jgame.jsのサンプル</a>を見ながら、検証してみたいコードを追加してみるのが、お勧めの学習方法です。
+	</p>
+</div>
+</body>
+</html>
