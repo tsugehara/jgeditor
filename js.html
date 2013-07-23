@@ -4,23 +4,36 @@
 <meta charset="UTF-8">
 <title>jgeditor</title>
 <style type="text/css" media="screen">
-#editor { 
-	width:500px;
-	height:500px;
+.container {
+	width:100%;
+	position:relative;
 }
-.game-container {
-	min-width:500px;
-	min-height:500px;
+.full {
+	margin-right: 482px;
+}
+.right {
+	width:482px;
+	position:absolute;
+	right:0;
+	top:0;
 	padding:0;
 	margin:0;
 	border:0;
 }
+#editor { 
+	height:482px;
+}
+.game-container {
+	width: 482px;
+	height:482px;
+	border: 1px solid black;
+}
 #error-console {
-	width:500px;
+	width:100%;
 	height:120px;
 }
 #output {
-	width:500px;
+	width:100%;
 	height:120px;
 }
 .l {
@@ -83,8 +96,8 @@ window.onload = function() {
 </script>
 </head>
 <body>
-<div>
-	<div id="editor" class="l">window.onload = function() {
+<div class="container">
+	<div id="editor" class="full">window.onload = function() {
     var game = new jg.Game(480, 480);
     game.preload({logo: "http://jgame-js.sourceforge.jp/img/logo-m.png"});
     game.loaded.handle(function() {
@@ -113,10 +126,9 @@ window.onload = function() {
         }
     });	
 }</div>
-	<div class="l game-container">
+	<div class="right">
 		<iframe id="jgame-con" class="game-container"></iframe>
 	</div>
-	<div class="c"></div>
 </div>
 <div>
 	<input type="button" value="実行(Ctrl+R)" onclick="window.editorFunc.run()" />

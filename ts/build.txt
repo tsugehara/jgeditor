@@ -1,3 +1,4 @@
+tsc-dummy.d.ts
 editor.ts
 --out ../js/editor.jgame.js
 --declaration
