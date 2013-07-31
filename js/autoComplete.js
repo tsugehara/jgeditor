@@ -4,7 +4,7 @@ define('autocomplete', ['require', 'exports', 'module', 'ace/keyboard/hash_handl
 	var HashHandler = require('ace/keyboard/hash_handler').HashHandler;
 	var EventEmitter = require("ace/lib/event_emitter").EventEmitter;
 	var AutoCompleteView = require('AutoCompleteView').AutoCompleteView;
-	var TooltipView = require('TooltipView').TooltipView;
+	//var TooltipView = require('TooltipView').TooltipView;
 	var AceRange = require('ace/range').Range;
 
 	var oop = require("ace/lib/oop");
@@ -16,7 +16,7 @@ define('autocomplete', ['require', 'exports', 'module', 'ace/keyboard/hash_handl
 		oop.implement(self, EventEmitter);
 		this.handler = new HashHandler();
 		this.view = new AutoCompleteView(editor, self);
-		this.tooltip = new TooltipView(editor, self);
+		//this.tooltip = new TooltipView(editor, self);
 		var self = this;
 		var onchanged = function(elm) {
 			var detail = playground.getCompilationDetail($(elm).data("name"));
@@ -41,7 +41,7 @@ define('autocomplete', ['require', 'exports', 'module', 'ace/keyboard/hash_handl
 			editor.container.appendChild(self.view.wrap);
 			editor.container.appendChild(self.view.wrap2);
 			self.listElement.innerHTML = '';
-			editor.container.appendChild(self.tooltip.wrap);
+			//editor.container.appendChild(self.tooltip.wrap);
 		}
 
 		this.compilation = function(cursor){
@@ -118,7 +118,7 @@ define('autocomplete', ['require', 'exports', 'module', 'ace/keyboard/hash_handl
 				self.view.ensureFocus();
 			}else{
 				self.view.hide();
-				self.tooltip.hide();
+				//self.tooltip.hide();
 			}
 		}
 
@@ -127,7 +127,7 @@ define('autocomplete', ['require', 'exports', 'module', 'ace/keyboard/hash_handl
 			var count = self.compilation(editor.getCursorPosition());
 			if(!(count > 0)){
 				self.view.hide();
-				self.tooltip.hide();
+				//self.tooltip.hide();
 				return;
 			}
 			editor.keyBinding.addKeyboardHandler(self.handler);
@@ -146,7 +146,7 @@ define('autocomplete', ['require', 'exports', 'module', 'ace/keyboard/hash_handl
 		this.handler.detach = function(){
 			editor.removeEventListener("change", self.refreshCompilation);
 			self.view.hide();
-			self.tooltip.hide();
+			//self.tooltip.hide();
 			self._emit("detach", {sender: self});
 			self._active = false;
 		}
