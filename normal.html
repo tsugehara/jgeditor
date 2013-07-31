@@ -37,15 +37,7 @@
 	height:120px;
 }
 
-.ace_tooltip {
-	/*height: 1em;*/
-	overflow:hidden;
-	background:white;
-	border:1px solid #ccc;
-}
-
 .ace_autocomplete ul{
-	width:400px;
 	margin:0px;
 	padding:2px;
 }
@@ -98,6 +90,7 @@
 	visibility:visible;
 }
 </style>
+<script type="text/javascript" src="js/keymaster.min.js"></script>
 <script type="text/javascript" src="js/ts/typescriptServices.js"></script>
 <script type="text/javascript" src="js/jquery-1.9.1.js"></script>
 <script type="text/javascript" src="js/ace/ace.js"></script>
@@ -188,48 +181,23 @@ window.onload = function() {
 			mac: mac
 		}
 	}
-	editor.commands.addCommand({
-		name: "check",
-		bindKey: bindKey("Ctrl-S", "Command-S"),
-		exec: f.check
+	key('⌘+r, ctrl+r', function(event, handler){
+		f.run(handler, event);
+		return false;
 	});
-	editor.commands.addCommand({
-		name: "build",
-		bindKey: bindKey("Ctrl-B", "Command-B"),
-		exec: f.build
+	key('⌘+shift+r, ctrl+shift+r', function(event, handler){
+		f.stop(handler, event);
+		return false;
 	});
-	editor.commands.addCommand({
-		name: "run",
-		bindKey: bindKey("Ctrl-R", "Command-R"),
-		exec: f.run
+	key('⌘+b, ctrl+b', function(event, handler){
+		f.build(handler, event);
+		return false;
 	});
-	editor.commands.addCommand({
-		name: "stop",
-		bindKey: bindKey("Ctrl-Shift-R", "Command-Shift-R"),
-		exec: f.stop
+	key('⌘+s, ctrl+s', function(event, handler){
+		f.check(handler, event);
+		return false;
 	});
 
-
-	/*
-	editor.commands.addCommand({
-		name: "insertstring",
-		exec: function(editor, str) {
-			editor.insert(str);
-			console.log("hey");
-		},
-		multiSelectAction: "forEach"
-	});
-	*/
-	/*
-	editor.commands.bindKey(".", "autocomplete");
-	editor.commands.addCommand({
-		name: "autocomplete",
-		exec: function(editor) {
-			editor.commands.exec("insertstring", editor, ".");
-			console.log("auto!!");
-		}
-	});
-	*/
 	editor.addEventListener("mousedown", function() {
 		if (autoComplete.isActive())
 			autoComplete.deactivate();
