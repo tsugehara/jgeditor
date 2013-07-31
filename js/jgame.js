@@ -9,6 +9,7 @@ var jg;
         Angle[Angle["Down"] = 4] = "Down";
     })(jg.Angle || (jg.Angle = {}));
     var Angle = jg.Angle;
+
     (function (RenderTransferMode) {
         RenderTransferMode[RenderTransferMode["Unknown"] = 0] = "Unknown";
         RenderTransferMode[RenderTransferMode["Transfer"] = 1] = "Transfer";
@@ -17,6 +18,7 @@ var jg;
         RenderTransferMode[RenderTransferMode["Direct"] = 3] = "Direct";
     })(jg.RenderTransferMode || (jg.RenderTransferMode = {}));
     var RenderTransferMode = jg.RenderTransferMode;
+
     (function (InputEventType) {
         InputEventType[InputEventType["Unknown"] = 0] = "Unknown";
         InputEventType[InputEventType["Keyboard"] = 1] = "Keyboard";
@@ -24,6 +26,7 @@ var jg;
         InputEventType[InputEventType["Point"] = 2] = "Point";
     })(jg.InputEventType || (jg.InputEventType = {}));
     var InputEventType = jg.InputEventType;
+
     (function (InputEventAction) {
         InputEventAction[InputEventAction["Unknown"] = 0] = "Unknown";
         InputEventAction[InputEventAction["Down"] = 1] = "Down";
@@ -32,6 +35,7 @@ var jg;
         InputEventAction[InputEventAction["Up"] = 3] = "Up";
     })(jg.InputEventAction || (jg.InputEventAction = {}));
     var InputEventAction = jg.InputEventAction;
+
     (function (Keytype) {
         Keytype[Keytype["Unknown"] = 0] = "Unknown";
         Keytype[Keytype["Left"] = 1] = "Left";
@@ -43,13 +47,16 @@ var jg;
         Keytype[Keytype["Esc"] = 6] = "Esc";
     })(jg.Keytype || (jg.Keytype = {}));
     var Keytype = jg.Keytype;
+
     (function (ShapeStyle) {
         ShapeStyle[ShapeStyle["Unknown"] = 0] = "Unknown";
+
         ShapeStyle[ShapeStyle["Stroke"] = 1] = "Stroke";
 
         ShapeStyle[ShapeStyle["Fill"] = 2] = "Fill";
     })(jg.ShapeStyle || (jg.ShapeStyle = {}));
     var ShapeStyle = jg.ShapeStyle;
+
     (function (ShapeType) {
         ShapeType[ShapeType["Unknown"] = 0] = "Unknown";
         ShapeType[ShapeType["Rect"] = 1] = "Rect";
@@ -57,6 +64,7 @@ var jg;
         ShapeType[ShapeType["Arc"] = 2] = "Arc";
     })(jg.ShapeType || (jg.ShapeType = {}));
     var ShapeType = jg.ShapeType;
+
     (function (EffectType) {
         EffectType[EffectType["None"] = 0] = "None";
         EffectType[EffectType["Fade"] = 1] = "Fade";
@@ -754,9 +762,12 @@ var jg;
 
         E.prototype.show = function () {
             this.opacity = 1;
+            this.updated();
         };
+
         E.prototype.hide = function () {
             this.opacity = 0;
+            this.updated();
         };
         return E;
     })();
@@ -767,7 +778,7 @@ var jg;
     var canvas = document.createElement("canvas");
     var context = canvas.getContext("2d");
     for (var p in jg.ENTITY_OPTIONS_DEFAULT_VALUES)
-        if (jg.ENTITY_OPTIONS_DEFAULT_VALUES[p] == undefined)
+        if (jg.ENTITY_OPTIONS_DEFAULT_VALUES[p] === undefined)
             jg.ENTITY_OPTIONS_DEFAULT_VALUES[p] = context[p];
 })();
 var __extends = this.__extends || function (d, b) {
@@ -806,6 +817,7 @@ var jg;
         Shape.prototype.setLineWidth = function (width) {
             this.setDrawOption("lineWidth", width);
         };
+
         Shape.prototype.getLineWidth = function () {
             return this.getDrawOption("lineWidth");
         };
@@ -815,6 +827,7 @@ var jg;
                 this.setDrawOption("strokeStyle", color); else
                 this.setDrawOption("fillStyle", color);
         };
+
         Shape.prototype.getColor = function () {
             if (this.style == jg.ShapeStyle.Stroke)
                 return this.getDrawOption("strokeStyle"); else
@@ -865,19 +878,15 @@ var jg;
             this.handlers = [];
         }
         Trigger.prototype.handleInsert = function (index, owner, handler) {
-            if (!handler) {
-                this.handlers.splice(index, 0, { owner: window, handler: owner });
-            } else {
+            if (!handler)
+                this.handlers.splice(index, 0, { owner: window, handler: owner }); else
                 this.handlers.splice(index, 0, { owner: owner, handler: handler });
-            }
         };
 
         Trigger.prototype.handle = function (owner, handler) {
-            if (!handler) {
-                this.handlers.push({ owner: window, handler: owner });
-            } else {
+            if (!handler)
+                this.handlers.push({ owner: window, handler: owner }); else
                 this.handlers.push({ owner: owner, handler: handler });
-            }
         };
 
         Trigger.prototype.destroy = function () {
@@ -887,10 +896,9 @@ var jg;
         Trigger.prototype.removeAll = function (owner) {
             var ret = [];
             var tmp;
-            while (tmp = this.handlers.pop()) {
+            while (tmp = this.handlers.shift())
                 if (tmp.owner != owner)
                     ret.push(tmp);
-            }
 
             this.handlers = ret;
         };
@@ -898,10 +906,9 @@ var jg;
         Trigger.prototype.removeAllByHandler = function (handler) {
             var ret = [];
             var tmp;
-            while (tmp = this.handlers.pop()) {
+            while (tmp = this.handlers.shift())
                 if (tmp.handler != handler)
                     ret.push(tmp);
-            }
 
             this.handlers = ret;
         };
@@ -913,10 +920,9 @@ var jg;
                 handler = owner;
                 owner = window;
             }
-            while (tmp = this.handlers.pop()) {
+            while (tmp = this.handlers.shift())
                 if (tmp.handler != handler || tmp.owner != owner)
                     ret.push(tmp);
-            }
 
             this.handlers = ret;
         };
@@ -1006,6 +1012,7 @@ var jg;
             return this.sound + url;
         };
         ResourceStructure.Default = new ResourceStructure("img/", "sound/");
+
         ResourceStructure.Plain = new ResourceStructure("", "");
         return ResourceStructure;
     })();
@@ -1282,11 +1289,9 @@ var jg;
                     this[mode + "End"]();
 
             var linkMode = this.currentMode();
-            if (linkMode && this[linkMode + "Show"])
+            if (newMode !== undefined && newMode != newMode)
+                this.changeMode(newMode); else if (linkMode && this[linkMode + "Show"])
                 this[linkMode + "Show"]();
-
-            if (newMode)
-                this.changeMode(newMode);
         };
 
         Scene.prototype.createLayer = function (name, size) {
@@ -2008,6 +2013,7 @@ var jg;
             this.animated.fire();
         };
         MultilineText.LINE_HEIGHT_NORMAL = 1.2;
+
         MultilineText.BROWSER_BASELINE_MARGIN = 0;
         return MultilineText;
     })(jg.E);
@@ -2029,6 +2035,32 @@ var jg;
             var tw = this.tile.tileWidth;
             var th = this.tile.tileHeight;
             c.drawImage(this.image, (chip % this.sep) * tw, Math.floor(chip / this.sep) * th, tw, th, x * tw, y * th, tw, th);
+        };
+
+        ChipSet.prototype.getChips = function () {
+            var len = this.count();
+            var sprite = new jg.Sprite(this.image);
+            var buf = new jg.BufferedRenderer(sprite);
+            var ret = [];
+            var w = this.tile.tileWidth;
+            var h = this.tile.tileHeight;
+            var area = {
+                x: 0,
+                y: 0,
+                width: w,
+                height: h
+            };
+            buf.renderUnit(sprite);
+
+            for (var i = 0; i < len; i++) {
+                ret.push(buf.createSprite({
+                    x: (i % this.sep) * w,
+                    y: Math.floor(i / this.sep) * h,
+                    width: w,
+                    height: h
+                }, area, area));
+            }
+            return ret;
         };
         return ChipSet;
     })();
@@ -2115,18 +2147,37 @@ var jg;
             this.chipCount = cnt2;
         };
 
-        Tile.prototype.generate = function (data, width, height) {
-            this.data = data;
-            if (!width)
-                width = this.data.length;
-            if (!height)
-                height = this.data[0].length;
+        Tile.prototype._clear = function (width, height) {
             this.size = {
                 width: width,
                 height: height
             };
             this.width = this.tileWidth * width;
             this.height = this.tileHeight * height;
+        };
+
+        Tile.prototype.clear = function (width, height) {
+            if (!width)
+                width = this.size.width;
+            if (!height)
+                height = this.size.height;
+            this._clear(width, height);
+            this.data = [];
+            for (var x = 0; x < width; x++) {
+                this.data[x] = [];
+                for (var y = 0; y < height; y++)
+                    this.data[x][y] = 0;
+            }
+            this.refresh();
+        };
+
+        Tile.prototype.generate = function (data, width, height) {
+            this.data = data;
+            if (!width)
+                width = this.data.length;
+            if (!height)
+                height = this.data[0].length;
+            this._clear(width, height);
             this.refresh();
         };
 
@@ -2134,17 +2185,29 @@ var jg;
             this.canvas = window.createCanvas(this.width, this.height);
             var c = this.canvas.getContext("2d");
 
-            for (var x = 0; x < this.size.width; x++) {
-                for (var y = 0; y < this.size.height; y++) {
-                    if (this.data[x][y] < 0)
-                        continue;
-                    var cs = this.chipMap[this.data[x][y]];
-                    cs.draw(c, x, y, this.data[x][y] - cs.chipOffset);
-                }
-            }
+            for (var x = 0; x < this.size.width; x++)
+                for (var y = 0; y < this.size.height; y++)
+                    this.drawChip(x, y, false, c);
+
+            this.updated();
+        };
+
+        Tile.prototype.drawChip = function (x, y, clear, context) {
+            if (context === undefined)
+                context = this.canvas.getContext("2d");
+
+            if (clear)
+                context.clearRect(x * this.tileWidth, y * this.tileHeight, this.tileWidth, this.tileHeight);
+
+            if (this.data[x][y] < 0)
+                return;
+            var cs = this.chipMap[this.data[x][y]];
+            cs.draw(context, x, y, this.data[x][y] - cs.chipOffset);
         };
 
         Tile.prototype.draw = function (context) {
+            if (!this.canvas)
+                return;
             var parent = this.parent ? this.parent : this;
             var scroll = parent.scroll ? parent.scroll : { x: 0, y: 0 };
             var src = {
@@ -2189,6 +2252,14 @@ var jg;
             }
 
             context.drawImage(this.canvas, src.x, src.y, src.width, src.height, dist.x, dist.y, dist.width, dist.height);
+        };
+
+        Tile.prototype.getChips = function () {
+            var ret = [];
+            var len = this.chips.length;
+            for (var i = 0; i < len; i++)
+                ret = ret.concat(this.chips[i].getChips());
+            return ret;
         };
         return Tile;
     })(jg.E);
@@ -2252,7 +2323,6 @@ var jg;
         __extends(LoadingScene, _super);
         function LoadingScene(game, resource) {
             _super.call(this, game);
-            this.game = game;
             this.resource = resource;
             this.resource.loaded.handle(this, this.complete);
             this.resource.added.handle(this, this.added);
@@ -2307,6 +2377,7 @@ var jg;
         return InputEvent;
     })();
     jg.InputEvent = InputEvent;
+
     var InputKeyboardEvent = (function (_super) {
         __extends(InputKeyboardEvent, _super);
         function InputKeyboardEvent(action, key, e) {
@@ -2316,6 +2387,7 @@ var jg;
         return InputKeyboardEvent;
     })(InputEvent);
     jg.InputKeyboardEvent = InputKeyboardEvent;
+
     var InputPointEvent = (function (_super) {
         __extends(InputPointEvent, _super);
         function InputPointEvent(action, e, point) {
@@ -2713,13 +2785,13 @@ var jg;
         GameTimer.prototype.tryFire = function (t) {
             this.tick += t;
             if (this.wait <= this.tick)
-                this.fire(t);
+                this.fire();
         };
 
-        GameTimer.prototype.fire = function (t) {
+        GameTimer.prototype.fire = function () {
             this.tick = 0;
 
-            this.trigger.fastFire(t);
+            this.trigger.fastFire(this);
         };
         return GameTimer;
     })();
@@ -2734,6 +2806,7 @@ var jg;
                 args[_i] = arguments[_i + 2];
             }
             this._exit = false;
+            this.id = jg.JGUtil.generateId();
             this.width = width;
             this.height = height;
             this.targetFps = 0;
@@ -2869,6 +2942,7 @@ var jg;
             this.eventQueue.push(new jg.InputPointEvent(jg.InputEventAction.Down, e, this.getOffsetByEvent(e)));
             e.preventDefault();
         };
+
         Game.prototype.ontouchstart = function (e) {
             var touches = e.changedTouches;
             this.isPointDown = true;
@@ -2886,6 +2960,7 @@ var jg;
 
             e.preventDefault();
         };
+
         Game.prototype.ontouchmove = function (e) {
             if (!this.isPointDown)
                 return;
@@ -2907,6 +2982,7 @@ var jg;
 
             e.preventDefault();
         };
+
         Game.prototype.ontouchend = function (e) {
             if (!this.isPointDown)
                 return;
@@ -2921,17 +2997,43 @@ var jg;
         };
 
         Game.prototype.enablePointHandler = function () {
-            this.dragParam = null;
+            this.disablePointHandler();
 
             try  {
                 if (this.isTouchEnable()) {
-                    this.renderer.handler.addEventListener("touchstart", jg.JGUtil.proxy(this.ontouchstart, this), false);
-                    this.renderer.handler.addEventListener("touchmove", jg.JGUtil.proxy(this.ontouchmove, this), false);
-                    this.renderer.handler.addEventListener("touchend", jg.JGUtil.proxy(this.ontouchend, this), false);
+                    this.renderer.handler.addEventListener("touchstart", jg.JGUtil.createIdProxy(this.id, this.ontouchstart, this), false);
+                    this.renderer.handler.addEventListener("touchmove", jg.JGUtil.createIdProxy(this.id, this.ontouchmove, this), false);
+                    this.renderer.handler.addEventListener("touchend", jg.JGUtil.createIdProxy(this.id, this.ontouchend, this), false);
                 } else {
-                    this.renderer.handler.addEventListener("mousedown", jg.JGUtil.proxy(this.onmousedown, this), false);
-                    this.renderer.handler.addEventListener("mousemove", jg.JGUtil.proxy(this.onmousemove, this), false);
-                    this.renderer.handler.addEventListener("mouseup", jg.JGUtil.proxy(this.onmouseup, this), false);
+                    this.renderer.handler.addEventListener("mousedown", jg.JGUtil.createIdProxy(this.id, this.onmousedown, this), false);
+                    this.renderer.handler.addEventListener("mousemove", jg.JGUtil.createIdProxy(this.id, this.onmousemove, this), false);
+                    this.renderer.handler.addEventListener("mouseup", jg.JGUtil.createIdProxy(this.id, this.onmouseup, this), false);
+                }
+            } catch (ex) {
+            }
+        };
+
+        Game.prototype.disablePointHandler = function () {
+            this.dragParam = null;
+            try  {
+                if (this.isTouchEnable()) {
+                    if (jg.JGUtil.getIdProxy(this.id, this.ontouchstart, this)) {
+                        this.renderer.handler.removeEventListener("touchstart", jg.JGUtil.getIdProxy(this.id, this.ontouchstart, this), false);
+                        this.renderer.handler.removeEventListener("touchmove", jg.JGUtil.getIdProxy(this.id, this.ontouchmove, this), false);
+                        this.renderer.handler.removeEventListener("touchend", jg.JGUtil.getIdProxy(this.id, this.ontouchend, this), false);
+                        jg.JGUtil.deleteIdProxy(this.id, this.ontouchstart, this);
+                        jg.JGUtil.deleteIdProxy(this.id, this.ontouchmove, this);
+                        jg.JGUtil.deleteIdProxy(this.id, this.ontouchend, this);
+                    }
+                } else {
+                    if (jg.JGUtil.getIdProxy(this.id, this.onmousedown, this)) {
+                        this.renderer.handler.removeEventListener("mousedown", jg.JGUtil.getIdProxy(this.id, this.onmousedown, this), false);
+                        this.renderer.handler.removeEventListener("mousemove", jg.JGUtil.getIdProxy(this.id, this.onmousemove, this), false);
+                        this.renderer.handler.removeEventListener("mouseup", jg.JGUtil.getIdProxy(this.id, this.onmouseup, this), false);
+                        jg.JGUtil.deleteIdProxy(this.id, this.onmousedown, this);
+                        jg.JGUtil.deleteIdProxy(this.id, this.onmousemove, this);
+                        jg.JGUtil.deleteIdProxy(this.id, this.onmouseup, this);
+                    }
                 }
             } catch (ex) {
             }
@@ -2952,10 +3054,20 @@ var jg;
         };
 
         Game.prototype.enableKeyboardHandler = function () {
+            this.disableKeyboardHandler();
             try  {
-                document.addEventListener("keydown", jg.JGUtil.proxy(this.onkeydown, this), false);
-                document.addEventListener("keyup", jg.JGUtil.proxy(this.onkeyup, this), false);
+                document.addEventListener("keydown", jg.JGUtil.createIdProxy(this.id, this.onkeydown, this), false);
+                document.addEventListener("keyup", jg.JGUtil.createIdProxy(this.id, this.onkeyup, this), false);
             } catch (ex) {
+            }
+        };
+
+        Game.prototype.disableKeyboardHandler = function () {
+            if (jg.JGUtil.getIdProxy(this.id, this.onkeydown, this)) {
+                document.removeEventListener("keydown", jg.JGUtil.getIdProxy(this.id, this.onkeydown, this), false);
+                document.removeEventListener("keyup", jg.JGUtil.getIdProxy(this.id, this.onkeyup, this), false);
+                jg.JGUtil.deleteIdProxy(this.id, this.onkeydown, this);
+                jg.JGUtil.deleteIdProxy(this.id, this.onkeyup, this);
             }
         };
 
@@ -3120,7 +3232,7 @@ var jg;
                 } else {
                     if (e.action == jg.InputEventAction.Down)
                         this.setPointingEntity(e); else if (!this.dragParam)
-                        return; else
+                        continue; else
                         (e).set(this.dragParam.entity);
 
                     if ((e).entity && (e).entity[n])
@@ -4572,6 +4684,7 @@ var jg;
                 easing: easing
             });
         };
+
         Timeline.prototype.resizeBy = function (size, time, easing, easing2) {
             if (typeof easing === "number") {
                 return this.tween({
@@ -4676,6 +4789,7 @@ var jg;
         return Timeline;
     })();
     jg.Timeline = Timeline;
+
     Timeline.prototype.isFrameBased = false;
 })(jg || (jg = {}));
 var jg;
@@ -4710,12 +4824,12 @@ var jg;
             var a2 = p2;
             if (a1.width && a1.height) {
                 if (a2.width && a2.height) {
-                    return a1.x <= (a2.x + a2.width) && a2.x <= (a1.x + a1.width) && a1.y <= (a2.y + a2.height) && a2.y <= (a1.y + a1.height);
+                    return a1.x < (a2.x + a2.width) && a2.x < (a1.x + a1.width) && a1.y < (a2.y + a2.height) && a2.y < (a1.y + a1.height);
                 } else {
-                    return a2.x >= a1.x && a2.x <= (a1.x + a1.width) && a2.y >= a1.y && a2.y <= (a1.y + a1.height);
+                    return a2.x >= a1.x && a2.x < (a1.x + a1.width) && a2.y >= a1.y && a2.y < (a1.y + a1.height);
                 }
             } else if (a2.width && a2.height) {
-                return a1.x >= a2.x && a1.x <= (a2.x + a2.width) && a1.y >= a2.y && a1.y <= (a2.y + a2.height);
+                return a1.x >= a2.x && a1.x < (a2.x + a2.width) && a1.y >= a2.y && a1.y < (a2.y + a2.height);
             }
 
             return p1.x == p2.x && p1.y == p2.y;
@@ -4988,9 +5102,60 @@ var jg;
                 func.apply(self, arguments);
             };
         };
+
+        JGUtil.createIdProxy = function (id, func, self) {
+            var proxy = JGUtil.proxy(func, self);
+            JGUtil.idData[id].proxies.push(new ProxyData(func, self, proxy));
+            return proxy;
+        };
+
+        JGUtil.getIdProxy = function (id, func, self) {
+            var proxies = JGUtil.idData[id].proxies;
+            for (var i = 0; i < proxies.length; i++)
+                if (proxies[i].is(func, self))
+                    return proxies[i].proxy;
+
+            return null;
+        };
+
+        JGUtil.deleteIdProxy = function (id, func, self) {
+            var proxies = JGUtil.idData[id].proxies;
+            for (var i = 0; i < proxies.length; i++) {
+                if (proxies[i].is(func, self)) {
+                    proxies.splice(i, 1);
+                    i--;
+                }
+            }
+        };
+
+        JGUtil.generateId = function () {
+            if (!JGUtil.idData)
+                JGUtil.idData = [];
+            JGUtil.idData.push(new IdData());
+            return JGUtil.idData.length - 1;
+        };
         return JGUtil;
     })();
     jg.JGUtil = JGUtil;
+
+    var IdData = (function () {
+        function IdData() {
+            this.proxies = [];
+        }
+        return IdData;
+    })();
+
+    var ProxyData = (function () {
+        function ProxyData(func, self, proxy) {
+            this.func = func;
+            this.self = self;
+            this.proxy = proxy;
+        }
+        ProxyData.prototype.is = function (func, self) {
+            return this.func == func && this.self == self;
+        };
+        return ProxyData;
+    })();
 })(jg || (jg = {}));
 var jg;
 (function (jg) {
@@ -5039,6 +5204,7 @@ var jg;
             this.setDrawOption("strokeStyle", color);
             return this;
         };
+
         Line.prototype.getColor = function () {
             return this.getDrawOption("strokeStyle");
         };
@@ -5047,6 +5213,7 @@ var jg;
             this.setDrawOption("fillStyle", color);
             return this;
         };
+
         Line.prototype.getFillColor = function () {
             return this.getDrawOption("fillStyle");
         };
@@ -5055,6 +5222,7 @@ var jg;
             this.setDrawOption("lineWidth", width);
             return this;
         };
+
         Line.prototype.getLineWidth = function () {
             return this.getDrawOption("lineWidth");
         };
@@ -5063,6 +5231,7 @@ var jg;
             this.setDrawOption("lineCap", lineCap);
             return this;
         };
+
         Line.prototype.getLineCap = function () {
             return this.getDrawOption("lineCap");
         };
@@ -5071,6 +5240,7 @@ var jg;
             this.setDrawOption("lineJoin", lineJoin);
             return this;
         };
+
         Line.prototype.getLineJoin = function () {
             return this.getDrawOption("lineJoin");
         };
@@ -5079,6 +5249,7 @@ var jg;
             this.setDrawOption("miterLimit", miterLimit);
             return this;
         };
+
         Line.prototype.getMiterLimit = function () {
             return this.getDrawOption("miterLimit");
         };
@@ -5235,10 +5406,12 @@ var jg;
 (function (jg) {
     var Effect = (function () {
         function Effect(method) {
+            var args = [];
+            for (var _i = 0; _i < (arguments.length - 1); _i++) {
+                args[_i] = arguments[_i + 1];
+            }
             this.method = method;
-            this.arguments = [];
-            for (var i = 1; i < arguments.length; i++)
-                this.arguments.push(arguments[i]);
+            this.arguments = args;
         }
         Effect.sceneEffect = function (game, scene1, scene2, type, callback, endOldScene) {
             var effect = new EffectScene(game, scene1, scene2);
@@ -5638,12 +5811,7 @@ var jg;
             this.padding = padding ? padding : new jg.Rectangle(8, 8, 8, 8);
             this.entities = [];
             if (bgImage) {
-                var bg;
-                if (bgImage instanceof jg.E) {
-                    bg = bgImage;
-                } else {
-                    bg = new jg.Sprite(bgImage);
-                }
+                var bg = (bgImage instanceof jg.E) ? bgImage : new jg.Sprite(bgImage);
                 this.setBg(this.createBgImage(bg));
             } else {
                 this.defaultSkin();
@@ -5652,6 +5820,7 @@ var jg;
         UIWindow.prototype.getBg = function () {
             return this.entities[0];
         };
+
         UIWindow.prototype.setBg = function (bg) {
             if (this.bg)
                 this.bg.remove();
@@ -5662,6 +5831,8 @@ var jg;
         UIWindow.prototype.createBgImage = function (e, srcPadding, buf) {
             if (!buf)
                 var buf = new jg.BufferedRenderer(e);
+            if (srcPadding === undefined)
+                srcPadding = this.padding;
             buf.renderUnit(e);
             if (buf.filter)
                 buf.applyFilter(buf.c, buf.size);
@@ -5670,65 +5841,65 @@ var jg;
             bg.height = this.height;
             bg.entities = [];
 
-            var s4_1 = buf.createSprite({ x: 0, y: 0, width: this.padding.left, height: this.padding.top });
+            var s4_1 = buf.createSprite({ x: 0, y: 0, width: srcPadding.left, height: srcPadding.top });
             s4_1.moveTo(0, 0);
             bg.append(s4_1);
-            var s4_2 = buf.createSprite({ x: e.width - this.padding.right, y: 0, width: this.padding.right, height: this.padding.top });
-            s4_2.moveTo(this.width - this.padding.right, 0);
+            var s4_2 = buf.createSprite({ x: e.width - srcPadding.right, y: 0, width: srcPadding.right, height: srcPadding.top });
+            s4_2.moveTo(this.width - srcPadding.right, 0);
             bg.append(s4_2);
-            var s4_3 = buf.createSprite({ x: e.width - this.padding.right, y: e.height - this.padding.bottom, width: this.padding.right, height: this.padding.bottom });
-            s4_3.moveTo(this.width - this.padding.right, this.height - this.padding.bottom);
+            var s4_3 = buf.createSprite({ x: e.width - srcPadding.right, y: e.height - srcPadding.bottom, width: srcPadding.right, height: srcPadding.bottom });
+            s4_3.moveTo(this.width - srcPadding.right, this.height - srcPadding.bottom);
             bg.append(s4_3);
-            var s4_4 = buf.createSprite({ x: 0, y: e.height - this.padding.bottom, width: this.padding.left, height: this.padding.bottom });
-            s4_4.moveTo(0, this.height - this.padding.bottom);
+            var s4_4 = buf.createSprite({ x: 0, y: e.height - srcPadding.bottom, width: srcPadding.left, height: srcPadding.bottom });
+            s4_4.moveTo(0, this.height - srcPadding.bottom);
             bg.append(s4_4);
 
             var h4_1 = buf.createSprite({
-                x: this.padding.left,
+                x: srcPadding.left,
                 y: 0,
-                width: e.width - this.padding.right - this.padding.left,
-                height: this.padding.top
+                width: e.width - srcPadding.right - srcPadding.left,
+                height: srcPadding.top
             });
-            h4_1.moveTo(this.padding.left, 0);
-            h4_1.width = this.width - this.padding.right - this.padding.left;
+            h4_1.moveTo(srcPadding.left, 0);
+            h4_1.width = this.width - srcPadding.right - srcPadding.left;
             bg.append(h4_1);
             var h4_2 = buf.createSprite({
-                x: e.width - this.padding.right,
-                y: this.padding.top,
-                width: this.padding.right,
-                height: e.height - this.padding.top - this.padding.bottom
+                x: e.width - srcPadding.right,
+                y: srcPadding.top,
+                width: srcPadding.right,
+                height: e.height - srcPadding.top - srcPadding.bottom
             });
-            h4_2.moveTo(this.width - this.padding.right, this.padding.top);
-            h4_2.height = this.height - this.padding.top - this.padding.bottom;
+            h4_2.moveTo(this.width - srcPadding.right, srcPadding.top);
+            h4_2.height = this.height - srcPadding.top - srcPadding.bottom;
             bg.append(h4_2);
             var h4_3 = buf.createSprite({
-                x: this.padding.left,
-                y: e.height - this.padding.bottom,
-                width: e.width - this.padding.right - this.padding.left,
-                height: this.padding.bottom
+                x: srcPadding.left,
+                y: e.height - srcPadding.bottom,
+                width: e.width - srcPadding.right - srcPadding.left,
+                height: srcPadding.bottom
             });
-            h4_3.moveTo(this.padding.left, this.height - this.padding.bottom);
-            h4_3.width = this.width - this.padding.right - this.padding.left;
+            h4_3.moveTo(srcPadding.left, this.height - srcPadding.bottom);
+            h4_3.width = this.width - srcPadding.right - srcPadding.left;
             bg.append(h4_3);
             var h4_4 = buf.createSprite({
                 x: 0,
-                y: this.padding.top,
-                width: this.padding.left,
-                height: e.height - this.padding.top - this.padding.bottom
+                y: srcPadding.top,
+                width: srcPadding.left,
+                height: e.height - srcPadding.top - srcPadding.bottom
             });
-            h4_4.moveTo(0, this.padding.top);
-            h4_4.height = this.height - this.padding.top - this.padding.bottom;
+            h4_4.moveTo(0, srcPadding.top);
+            h4_4.height = this.height - srcPadding.top - srcPadding.bottom;
             bg.append(h4_4);
 
             var center = buf.createSprite({
-                x: this.padding.left,
-                y: this.padding.top,
-                width: e.width - this.padding.left - this.padding.right,
-                height: e.height - this.padding.top - this.padding.bottom
+                x: srcPadding.left,
+                y: srcPadding.top,
+                width: e.width - srcPadding.left - srcPadding.right,
+                height: e.height - srcPadding.top - srcPadding.bottom
             });
-            center.moveTo(this.padding.left, this.padding.top);
-            center.width = this.width - this.padding.left - this.padding.right;
-            center.height = this.height - this.padding.top - this.padding.bottom;
+            center.moveTo(srcPadding.left, srcPadding.top);
+            center.width = this.width - srcPadding.left - srcPadding.right;
+            center.height = this.height - srcPadding.top - srcPadding.bottom;
             bg.append(center);
 
             return bg.createSprite();
@@ -5803,6 +5974,7 @@ var jg;
         MessageWindow.prototype.getNextCursor = function () {
             return this.nextCursor;
         };
+
         MessageWindow.prototype.setNextCursor = function (cursor) {
             this.nextCursor = cursor;
         };
@@ -5816,6 +5988,7 @@ var jg;
             this.isReaded = false;
             return this.scriptOffset;
         };
+
         MessageWindow.prototype.setScript = function (script, offset) {
             var textArea = this.textArea;
             this.script = script;
@@ -5852,23 +6025,29 @@ var jg;
                 this.tl().fadeOut(200); else
                 _super.prototype.hide.call(this);
         };
+
         MessageWindow.prototype.show = function (fade) {
             if (fade)
                 this.tl().fadeIn(200); else
                 _super.prototype.show.call(this);
         };
+
         MessageWindow.prototype.showText = function () {
             this.textArea.startAnimation();
         };
+
         MessageWindow.prototype.fastMode = function () {
             this.textArea.animeSpeed = this.fastSpeed;
         };
+
         MessageWindow.prototype.normalMode = function () {
             this.textArea.animeSpeed = this.normalSpeed;
         };
+
         MessageWindow.prototype.showAll = function () {
             this.textArea.showAll();
         };
+
         MessageWindow.prototype.next = function () {
             if (this.scriptOffset < 0)
                 return false;
@@ -5890,6 +6069,7 @@ var jg;
             old.tl().moveBy(0, -textArea.height, time).removeFromScene();
             textArea.tl().moveBy(0, -movePoint, (movePoint / textArea.height) * time);
         };
+
         MessageWindow.prototype.oldFadeOut = function (time) {
             if (time === undefined)
                 time = 500;
