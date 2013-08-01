@@ -3257,10 +3257,12 @@ declare module jg {
         */
         static getBrowser(): BrowserInfo;
         /**
-        * imageSmoothingEnabledを引数の値に変更する。変更後、ゲームはrefreshによって再構築される。
+        * 画像描画時のアンチエイリアス効果を変更する。
+        * 通常ドット絵を拡大するとアンチエイリアスによって滲むが、滲ませずにドットを強調して拡大する場合などに利用する。
+        * 変更後、ゲームはrefreshによって再構築される。
         * このメソッドはページに存在するすべてのゲームに影響を及ぼす。将来的には指定されたゲームのみに影響が及ぶよう改修予定
         * @param game 対象のゲーム
-        * @param
+        * @param crispEdges trueにすると転送時にアンチエイリアスをオフにする
         */
         static setCrispEdges(game: jg.Game, crispEdges: boolean): void;
         /**
