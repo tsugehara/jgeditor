@@ -2,11 +2,79 @@
 (function() {
 	var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
-	define('AutoCompleteView', ['require', 'exports', 'module', 'ace/lib/event', "ace/lib/oop", "ace/lib/event_emitter"], function(require, exports, module) {
+	define(
+		'AutoCompleteView',
+		[
+			'require',
+			'exports',
+			'module',
+			'ace/lib/event',
+			"ace/lib/oop",
+			"ace/lib/dom",
+			"ace/lib/event_emitter"
+		],
+		function(require, exports, module) {
 
 		var AutoCompleteView, selectedClassName;
 		var oop = require("ace/lib/oop");
+		var dom = require("ace/lib/dom");
 		var EventEmitter = require("ace/lib/event_emitter").EventEmitter;
+
+		var css = [
+			".ace_autocomplete_wrap {",
+			"	display: none;",
+			"	position: fixed;",
+			"	z-index: 1000;",
+			"	overflow: hidden;",
+			"	background: white;",
+			"	height: 226px;",
+			"	border: 1px solid #ccc;",
+			"}",
+			".ace_autocomplete ul{",
+			"	margin:0px;",
+			"	padding:2px;",
+			"}",
+			".ace_autocomplete li{",
+			"	padding:1px;",
+			"	line-height:1.2em;",
+			"	height:1.2em;",
+			"	overflow:hidden;",
+			"}",
+			".ace_autocomplete_selected{",
+			"	background:#eee;",
+			"}",
+			".ace_autocomplete_selected .label-name{",
+			"	font-weight:bold;",
+			"}",
+			".label-kind{",
+			"	background:#666;",
+			"	color:white;",
+			"	padding:0px 3px;",
+			"	margin-right:3px;",
+			"}",
+			".label-kind-property{",
+			"	background:green;",
+			"}",
+			".label-kind-method{",
+			"	background:blue;",
+			"}",
+			".label-kind-interface{",
+			"	background:#666;",
+			"}",
+			".label-kind-variable{",
+			"	background:orangered;",
+			"}",
+			".label-type{",
+			"	padding-left:10px;",
+			"	color:blue;",
+			"	visibility:hidden;",
+			"}",
+			".ace_autocomplete_selected .label-type{",
+			"	visibility:visible;",
+			"}",
+		];
+		dom.importCssString(css.join("\n"));
+
 
 		selectedClassName = 'ace_autocomplete_selected';
 		AutoCompleteView = (function() {
@@ -25,21 +93,12 @@
 					this.listElement = document.createElement('ul');
 					this.listElement.style.listStyleType = 'none';
 					this.listWrap.appendChild(this.listElement);
-					var styles = {
-						display: "none",
-						position: "fixed",
-						"z-index": "1000",
-						overflow: "hidden",
-						background: "white",
-						height: "226px",
-						border: "1px solid #ccc"
-					}
 					this.listWrap.style.overflow = "hidden";
 					$(this.wrap)
-						.css(styles)
 						.css("overflow", "hidden")
 						.css("width", "402px")
 						.addClass("ace_autocomplete")
+						.addClass("ace_autocomplete_wrap")
 						.append($("<div/>").addClass("hint"))
 						.append(this.listWrap)
 					;
@@ -48,7 +107,7 @@
 					$(this.wrap2)
 						.append($("<div/>").addClass("hint"))
 						.append($("<div/>").addClass("comment"))
-						.css(styles)
+						.addClass("ace_autocomplete_wrap")
 						.css("width", $(window).width() - 700+"px")
 						.css("padding", "px")
 						.css("overflow-x", "hidden")

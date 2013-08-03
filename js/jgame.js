@@ -647,14 +647,6 @@ var jg;
             p.isUpdated = true;
         };
 
-        E.prototype.isUpdate = function () {
-            return this.isUpdated;
-        };
-
-        E.prototype.reflected = function () {
-            this.isUpdated = false;
-        };
-
         E.prototype.tl = function () {
             if (!this._tl)
                 this._tl = new jg.Timeline(this);
@@ -2597,17 +2589,17 @@ var jg;
             var hasUpdate = false;
             if (this.scene.layerCount == 1) {
                 var layer = this.scene.root;
-                if (!layer.isUpdate()) {
+                if (!layer.isUpdated) {
                 } else {
                     hasUpdate = true;
                     if (!this.disableClear)
                         this.bc.putImageData(this.bg, 0, 0);
                     this.renderParent(layer, this.bc);
-                    layer.reflected();
+                    layer.isUpdated = false;
                 }
             } else {
                 for (var i in this.scene.layers) {
-                    if (this.scene.layers[i].isUpdate()) {
+                    if (this.scene.layers[i].isUpdated) {
                         hasUpdate = true;
                         break;
                     }
@@ -2618,12 +2610,12 @@ var jg;
                         this.bc.putImageData(this.bg, 0, 0);
                     for (var i in this.scene.layers) {
                         var layer = this.scene.layers[i];
-                        if (layer.isUpdate()) {
+                        if (layer.isUpdated) {
                             layer.context.clearRect(0, 0, layer.width, layer.height);
                             this.renderParent(layer, layer.context);
                         }
                         this.bc.drawImage(layer.canvas, layer.x, layer.y);
-                        layer.reflected();
+                        layer.isUpdated = false;
                     }
                 }
             }
@@ -3106,10 +3098,6 @@ var jg;
             }
         };
 
-        Game.prototype.exit = function () {
-            this._exit = true;
-        };
-
         Game.prototype.changeScene = function (scene, effect, endOldScene) {
             var _this = this;
             if (effect) {
@@ -3131,7 +3119,7 @@ var jg;
         Game.prototype.endScene = function (effect) {
             var _this = this;
             if (this.scenes.length == 1) {
-                this.exit();
+                this.end();
                 return;
             }
             if (effect) {
@@ -4469,10 +4457,6 @@ var jg;
             });
             this.add(action);
             return this;
-        };
-
-        Timeline.prototype.exec = function (func) {
-            this.then(func);
         };
 
         Timeline.prototype.frame = function (wait, frame) {

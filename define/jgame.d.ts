@@ -150,7 +150,6 @@ interface Window {
     mozRequestAnimationFrame(): number;
     webkitRequestAnimationFrame(): number;
     createCanvas(width: number, height: number): HTMLCanvasElement;
-    random(min: number, max: number): number;
     requestAnimationFrame(callback: FrameRequestCallback): number;
     msRequestAnimationFrame(callback: FrameRequestCallback): number;
 }
@@ -463,16 +462,6 @@ declare module jg {
         * なお、親要素がある場合は親要素の更新フラグ更新を優先させるため、本メソッドを呼び出した後に必ずthis.isUpdate()の戻り値がtrueになるわけではない
         */
         public updated(): void;
-        /**
-        * このEntityが更新されているかどうかを調べる。
-        * ※廃止検討中
-        */
-        public isUpdate(): boolean;
-        /**
-        * このEntityの更新フラグを下げる。
-        * ※廃止検討中
-        */
-        public reflected(): void;
         /**
         * このEntityのTimelineを取得する
         */
@@ -2237,12 +2226,6 @@ declare module jg {
         */
         public removeTimerAll(owner: any): void;
         /**
-        * ゲームを終了する。
-        * 実態はメインループの終了のみであり、本処理実行後でも_exitフラグの削除とmainメソッドの再実行によりゲームは再開可能。
-        * endとかぶっているため廃止予定。
-        */
-        public exit(): void;
-        /**
         * シーンを変更する
         * @param scene 変更後のシーン
         * @param effect 変更時にかけるエフェクト。省略時はエフェクト無しになる。通常、EffectTypeの値を指定する
@@ -2824,17 +2807,17 @@ declare module jg {
     class Timeline {
         /** 操作対象のEntity */
         public entity: jg.E;
-        /** */
+        /** 対象の全アクション */
         public queue: jg.Action[];
-        /** */
+        /** 停止中かどうか */
         public paused: boolean;
-        /** */
+        /** ループするかどうか */
         public looped: boolean;
         /** */
         public _activated: boolean;
         /** */
         public _parallel: jg.ParallelAction;
-        /** */
+        /** フレームベースかどうか。jgame.jsではデフォルトfalseで、変更は推奨されない */
         public isFrameBased: boolean;
         /**
         *
@@ -2919,11 +2902,6 @@ declare module jg {
         * @param func 実行する関数
         */
         public then(func: Function): Timeline;
-        /**
-        * then メソッドのシノニム。
-        * @param func 実行する関数
-        */
-        public exec(func: Function): void;
         /**
         * フレームを変更する。このメソッドを実行する場合、EntityがFrameSpriteである必要がある
         * @param wait この時間待ってから操作を実行

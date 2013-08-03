@@ -89,7 +89,7 @@ declare module TypeScript {
 		codeGenTarget: TypeScript.LanguageVersion;
 		moduleGenTarget: TypeScript.ModuleGenTarget;
 
-		outputOption: any;
+		outputOption: string;
 		mapSourceFiles: boolean;
 		emitFullSourceMapPath: boolean;
 
@@ -108,12 +108,18 @@ declare module TypeScript {
 		constructor(span: TextSpan, newLength: number);
 	}
 	interface IDiagnostic {
-		message(): string;
+		fileName(): string;
 		start(): number;
+		length(): number;
+		//diagnosticCode(): DiagnosticCode;
+		text(): string;
+		message(): string;
 	}
 	class LineMap {
 		constructor(_lineStarts: number[], length: number);
 		getLineNumberFromPosition(position: number): number;
+		lineStarts(): number[];
+		getLineStartPosition(lineNumber: number): number;
 	}
 }
 declare module Services {

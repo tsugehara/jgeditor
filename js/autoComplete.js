@@ -32,10 +32,6 @@ define('autocomplete', ['require', 'exports', 'module', 'ace/keyboard/hash_handl
 			return self._active;
 		}
 
-		this.setScriptName = function (name){
-			self.scriptName = name;
-		}
-
 		this.show = function () {
 			self.listElement = self.view.listElement;
 			editor.container.appendChild(self.view.wrap);

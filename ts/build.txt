@@ -1,4 +1,11 @@
 tsc-dummy.d.ts
 editor.ts
+DefineLoader.ts
+JgDiagnostics.ts
+LogSetting.ts
+JgScriptSnapshot.ts
+DiagnosticInfo.ts
+JgPlayground.ts
+JgPlaygroundService.ts
 --out ../js/editor.jgame.js
 --declaration
