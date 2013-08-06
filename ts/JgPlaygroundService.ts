@@ -14,8 +14,8 @@ module jgeditor {
 
 		getScriptNames():string[] {
 			var ret:string[] = [];
-			for (var n in this.host.snapshots)
-				ret.push(n);
+			for (var i=0; i<this.host.snapshots.length; i++)
+				ret.push(this.host.snapshots[i].fileName);
 
 			return ret;
 		}
@@ -43,7 +43,12 @@ module jgeditor {
 			if (this.host.findSnapshot(newName) > -1)
 				return false;
 
+			if (! newName.match(/^[0-9a-zA-Z_\-\.]+$/))
+				return false;
+
 			this.host.snapshots[index].fileName = newName;
+			if (name == this.current())
+				this.changeScript(newName);
 
 			this.clean();
 
@@ -66,6 +71,9 @@ module jgeditor {
 
 		addScript(name:string, initScript?:string) {
 			if (this.host.findSnapshot(name) >= 0)
+				return false;
+
+			if (! name.match(/^[0-9a-zA-Z_\-\.]+$/))
 				return false;
 
 			if (! this.host.addScript(name, initScript))

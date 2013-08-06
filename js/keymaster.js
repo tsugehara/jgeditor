@@ -106,7 +106,7 @@
 						if(event.preventDefault) event.preventDefault();
 							else event.returnValue = false;
 						if(event.stopPropagation) event.stopPropagation();
-						if(event.cancelBubble) event.cancelBubble = true;
+						if(event.cancelBubble!==undefined) event.cancelBubble = true;
 					}
 				}
 			}
@@ -278,6 +278,11 @@
 	global.key.getPressedKeyCodes = getPressedKeyCodes;
 	global.key.noConflict = noConflict;
 	global.key.unbind = unbindKey;
+	global.key.dispatch = function(event, scope) {
+		if (scope === undefined)
+			scope = _scope;
+		dispatch(event, scope);
+	}
 
 	if(typeof module !== 'undefined') module.exports = key;
 

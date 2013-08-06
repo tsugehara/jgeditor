@@ -975,7 +975,7 @@ declare module jg {
         /**
         * 指定したレイヤーを作成する
         * @param name 作成するレイヤー名
-        * @param size レイヤーの大きさ
+        * @param size レイヤーの大きさ。またはLayerクラスのインスタンス
         */
         public createLayer(name: string, size?: jg.CommonSize): jg.Layer;
         /**
@@ -1537,7 +1537,7 @@ declare module jg {
         public getChips(): jg.Sprite[];
     }
     /**
-    * オートタイル用ChipSet
+    * オートタイル用ChipSet。現在は一つの画像で一つのオートタイルのみサポート
     */
     class AutoTileChipSet extends ChipSet {
         /**
@@ -1547,13 +1547,22 @@ declare module jg {
         */
         public map(x: number, y: number): number;
         /**
+        * このChipSetで管理しているチップ数を取得する。
+        * AutoTileChipSetクラスの場合は1固定となる。
+        */
+        public count(): number;
+        /**
         * 描画する
         * @param c 描画対象context
         * @param x 描画X座標
         * @param y 描画Y座標
-        * @param chip 描画するチップ番号。現状オートタイルは1画像1チップのみであるため、本パラメータは利用しない
+        * @param chip 描画するチップ番号
         */
         public draw(c: CanvasRenderingContext2D, x: number, y: number, chip: number): void;
+        /**
+        * このChipSetのマップチップを個別に、Spriteの配列として取得する
+        */
+        public getChips(): jg.Sprite[];
     }
     /**
     * マップを描画するクラス。
@@ -1595,7 +1604,7 @@ declare module jg {
         public addChipSet(image: HTMLImageElement, opt?: any): void;
         public _clear(width: number, height: number): void;
         /**
-        * マップデータをすべて0で初期化する
+        * マップデータをすべて-1で初期化する
         * @param width 横幅（チップ数）
         * @param height 縦幅（チップ数）
         */
@@ -1603,10 +1612,11 @@ declare module jg {
         /**
         * マップデータを生成する
         * @param data データの二次元配列。[x][y]型である点に注意
-        * @param width マップの横幅（チップ数）。省略時はdata.lengthが利用される
+        * @param width マップの横幅（チップ数）。省略時はdata.lengthが利用される。なおこのパラメータにtrueを指定すると、widthとheightを省略しtranposeをtrueにしたものとして扱われる
         * @param height マップの縦幅（チップ数）。省略時はdata[0].lengthが利用される
+        * @param transpose 行列を反転させるかどうか
         */
-        public generate(data: number[][], width?: number, height?: number): void;
+        public generate(data: number[][], width?: any, height?: number, transpose?: boolean): void;
         /**
         * バッファを作り直した上で再描画を行い、更新済みフラグを立てる
         */
@@ -2073,6 +2083,10 @@ declare module jg {
         */
         public pointMove: jg.Trigger;
         /**
+        * 現在ゲームがフォーカスを持っているかどうか
+        */
+        public focus: boolean;
+        /**
         * 発生済みのユーザ入力イベント群。
         * jgame.jsではメインループ内で入力処理を発火させるため、keydownなどのDOMイベントでいったんここにプールしてから、メインループでイベント発火という手順を踏む。
         */
@@ -2282,7 +2296,12 @@ declare module jg {
         * ゲームを終了する。
         * 実態はメインループの終了のみであり、本処理実行後でも_exitフラグの削除とmainメソッドの再実行によりゲームは再開可能
         */
-        public end(): void;
+        public end(): boolean;
+        /**
+        * ゲームを再開する。
+        * endによって行われたメインループの再起動。
+        */
+        public resume(): boolean;
         /**
         * ポインティングされたEntityを設定する
         * @param param 対象のポインティングイベント
@@ -3117,6 +3136,11 @@ declare module jg {
         /** ブラウザ情報 */
         static browser: BrowserInfo;
         /**
+        * focus獲得と同時に動作し、focusが離れたら動作しないゲームにする。
+        * このメソッドは一つのGameインスタンスに対して一度しか呼び出してはならない。
+        */
+        static autoStop(...games: jg.Game[]): void;
+        /**
         * 座標の中心地を返す。
         * 引数がCommonAreaである場合、サイズも計算して返し、CommonOffsetである場合は何も計算せずに返す
         * @param p 判定する座標または領域
@@ -3280,6 +3304,13 @@ declare module jg {
         * 一意のIDを生成する
         */
         static generateId(): number;
+        /**
+        * 二次元配列のX軸とY軸を入れ替えた結果を返す。
+        * マトリックスのみのサポートであり、src[0].lengthとsrc[1].lengthが異なる配列はサポートされない。
+        * src[x][y] == ret[y][x]
+        * @param src 入力元配列
+        */
+        static transpose(src: any[][]): any[][];
     }
 }
 declare module jg {

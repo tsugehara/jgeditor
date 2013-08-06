@@ -91,7 +91,7 @@
 	clear:both;
 }
 </style>
-<script type="text/javascript" src="js/keymaster.min.js"></script>
+<script type="text/javascript" src="js/keymaster.js"></script>
 <script type="text/javascript" src="js/ts/typescriptServices.js"></script>
 <script type="text/javascript" src="js/jquery-1.9.1.js"></script>
 <script type="text/javascript" src="js/jquery-ui-1.10.2.custom.min.js"></script>
@@ -101,7 +101,7 @@
 <script type="text/javascript" src="js/autoCompleteView.js"></script>
 <script type="text/javascript" src="js/editor.jgame.js"></script>
 <script type="text/javascript" src="js/jgame.js"></script>
-<script type="text/javascript" src="js/jsziptools.min.js"></script>
+<script type="text/javascript" src="js/zip/jsziptools.min.js"></script>
 
 <script type="text/javascript">
 var f;
@@ -116,7 +116,6 @@ window.onload = function() {
 	var autoComplete;
 
 	var defines = new jgeditor.DefineLoader();
-	//defines.load("lib", "define/lib.d.ts");
 	defines.load("define/ecmascript-api.d.ts");
 	defines.load("define/dom-for-jgamejs.d.ts");
 	defines.load("define/jgame.d.ts");
@@ -136,6 +135,23 @@ window.onload = function() {
 
 	var error_console = $("#error-console");
 	f  = {
+		focus: function() {
+			var con = document.getElementById("jgame-con");
+			var w = con.contentWindow || con;
+			try {
+				var container = w.document.getElementById("jgame");
+				var childs = container.childNodes;
+				for (var i=0; i<childs.length; i++) {
+					if (childs[i].className == "input-handler") {
+						childs[i].focus();
+						return;
+					}
+				}
+			} catch(ex) {
+			}
+
+			w.focus();
+		},
 		clearError: function(text) {
 			error_console.html(text ? text : "");
 		},
@@ -199,7 +215,6 @@ window.onload = function() {
 		check: function(sender, e, callback) {
 			if (loading)
 				return null;
-			//document.getElementById("error-console").value = "checking..";
 			f.clearError("checking...");
 			playground.updateScript(editor.getValue());
 
@@ -222,6 +237,10 @@ window.onload = function() {
 			if (! f.check(sender, e, callback))
 				return null;
 		},
+		_onload: function(con) {
+			f.focus();
+			f.keyhandleForIframe(con);
+		},
 		run: function(sender, e) {
 			if (loading)
 				return;
@@ -234,7 +253,13 @@ window.onload = function() {
 			request.open("POST", "save.php");
 			request.send(prog);
 			request.onload = function() {
-				document.getElementById("jgame-con").src = "load.php?"+(new Date()).getTime();
+				var con = document.getElementById("jgame-con");
+				editor.focus();
+				con.src = "load.php?"+(new Date()).getTime();
+				con.onload = function() {
+					f.focus();
+					f.keyhandleForIframe(con);
+				}
 			}
 			request.onerror = function() {
 				alert("エラー");
@@ -260,6 +285,7 @@ window.onload = function() {
 			}
 		},
 		stop: function(sender, e) {
+			editor.focus();
 			document.getElementById("jgame-con").src = "about:blank"
 		},
 		addTab: function(name) {
@@ -321,6 +347,13 @@ window.onload = function() {
 			active.removeClass("file-tab-active");
 			target.addClass("file-tab-active");
 		},
+		keyhandlerForIframe: function(e) {
+			key.dispatch(e);
+		},
+		keyhandleForIframe: function(con) {
+			con.contentWindow.removeEventListener("keydown", f.keyhandlerForIframe, false);
+			con.contentWindow.addEventListener("keydown", f.keyhandlerForIframe, false);
+		},
 		zip: function(sender) {
 			var snapshots = playground.host.snapshots;
 			var defines = playground.defines;
@@ -374,6 +407,10 @@ window.onload = function() {
 					.text("ダウンロード")
 					.click(function() {
 						a.remove();
+						var browser = jg.JGUtil.getBrowser();
+						if (browser.msie) {
+							alert("IEではZIPダウンロードが出来ません");
+						}
 					});
 				a.insertAfter($(sender));
 			}).fail(function() {
@@ -501,20 +538,22 @@ window.onload = function() {
 	$(".files").disableSelection();
 
 	editor.focus();
+	f.keyhandleForIframe(document.getElementById("jgame-con"));
 }
 })();
 </script>
 </head>
 <body>
+<div class="files">
+	<div class="file-sortable"></div>
+	<div class="file-tab file-add-tab">+</div>
+	<div class="file-tab file-extra-tab">...</div><div class="c"></div>
+</div>
 <div class="container">
 	<div class="full">
-		<div class="files">
-			<div class="file-sortable"></div>
-			<div class="file-tab file-add-tab">+</div>
-			<div class="file-tab file-extra-tab">...</div><div class="c"></div>
-		</div>
 		<div id="editor">class SampleScene extends jg.Scene {
     shapes:jg.Shape[];
+    chara:jg.Character;
     logo:jg.Sprite;
     constructor(game:jg.Game) {
         super(game);
@@ -530,15 +569,39 @@ window.onload = function() {
             this.shapes.push(shape);
             this.append(shape);
         }
+        this.chara = new jg.Character(
+            new jg.Shape(32*2, 32*4, jg.ShapeStyle.Fill, "orange").createSprite().image,
+            32,
+            32
+        );
+        this.append(this.chara);
+        this.keyDown = new jg.Trigger();
+        this.keyDown.handle(this, this.onKeyDown);
         this.started.handle(this, this.anime);
+    }
+    onKeyDown(e:jg.InputKeyboardEvent) {
+        switch (e.key) {
+            case jg.Keytype.Left:
+                this.chara.moveLeft(true);
+            break;
+            case jg.Keytype.Right:
+                this.chara.moveRight(true);
+            break;
+            case jg.Keytype.Up:
+                this.chara.moveUp(true);
+            break;
+            case jg.Keytype.Down:
+                this.chara.moveDown(true);
+            break;
+        }
     }
     anime() {
         var game = this.game;
         for (var i=0; i&lt;this.shapes.length; i++) {
             this.shapes[i].tl().tween({
-                x: () =&gt; { return game.random(0,480-32); },
-                y: () =&gt; { return game.random(0,480-32); },
-                rotate: () =&gt; { return game.random(0, 360); },
+                x: () => { return game.random(0,480-32); },
+                y: () => { return game.random(0,480-32); },
+                rotate: () => { return game.random(0, 360); },
                 time: 1000
             }).loop()
         }
@@ -547,24 +610,31 @@ window.onload = function() {
 
 window.onload = function() {
     var game = new jg.Game(480, 480);
+    game.enableKeyboardHandler();
     game.preload({logo: "http://jgame-js.sourceforge.jp/img/logo-m.png"});
     game.loaded.handle(function() {
         var scene = new SampleScene(game);
         game.changeScene(scene);
-    });	
+    });
 }</div>
+	</div>
 	<div class="right">
 		<iframe id="jgame-con" class="game-container"></iframe>
 	</div>
 </div>
 <div>
-	<input type="button" value="型チェック(Ctrl+S)" onclick="f.check()" />
-	<input type="button" value="ビルド(Ctrl+B)" onclick="f.build()" />
-	<input type="button" value="実行(Ctrl+R)" onclick="f.run()" />
-	<input type="button" value="停止(Ctrl+Shift+R)" onclick="f.stop()" />
-	<input type="button" value="別ウィンドウで実行" onclick="f.run_window()" class="edit" />
-	<input id="zip-button" type="button" value="ZIP生成" onclick="f.zip(document.getElementById('zip-button'))" />
-	<span>Ctrl+Spaceで入力ヒントを表示</span>
+	<div>
+		<input type="button" value="型チェック(Ctrl+S)" onclick="f.check()" />
+		<input type="button" value="ビルド(Ctrl+B)" onclick="f.build()" />
+		<input type="button" value="実行(Ctrl+R)" onclick="f.run()" />
+		<input type="button" value="停止(Ctrl+Shift+R)" onclick="f.stop()" />
+		<input type="button" value="フォーカス" onclick="f.focus()" />
+		<input type="button" value="別ウィンドウで実行" onclick="f.run_window()" />
+		<input id="zip-button" type="button" value="ZIP生成" onclick="f.zip(document.getElementById('zip-button'))" />
+	</div>
+	<div>
+		<span>Ctrl+Spaceで入力ヒントを表示</span>
+	</div>
 </div>
 <div class="container">
 	<div class="full">

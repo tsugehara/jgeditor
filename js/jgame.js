@@ -1291,10 +1291,15 @@ var jg;
                 if (!this.layers[i].hasBuffer())
                     this.layers[i].createBuffer();
 
-            this.layers[name] = new jg.Layer(this);
-            if (size) {
-                this.layers[name].width = size.width;
-                this.layers[name].height = size.height;
+            if (size && size instanceof jg.Layer) {
+                this.layers[name] = size;
+                this.layers[name].scene = this;
+            } else {
+                this.layers[name] = new jg.Layer(this);
+                if (size) {
+                    this.layers[name].width = size.width;
+                    this.layers[name].height = size.height;
+                }
             }
             this.layers[name].createBuffer();
             this.layerCount++;
@@ -2069,36 +2074,41 @@ var jg;
             return this.tile.data[x][y];
         };
 
+        AutoTileChipSet.prototype.count = function () {
+            return 1;
+        };
+
         AutoTileChipSet.prototype.draw = function (c, x, y, chip) {
             var tw = this.tile.tileWidth;
             var th = this.tile.tileHeight;
             var tw2 = Math.floor(this.tile.tileWidth / 2);
             var th2 = Math.floor(this.tile.tileHeight / 2);
-            for (var i = 0; i < 4; i++) {
-                for (var j = 0; j < 4; j++) {
-                    var ox = x + (Math.floor((i + 1) / 2) - 1);
-                    var oy = y + (Math.floor((j + 1) / 2) - 1);
-                    var n = this.map(ox, oy);
-                    if (n == -1)
-                        continue;
-
-                    var tx = ox + (i % 2 == 0 ? 1 : -1);
-                    var ty = oy + (j % 2 == 0 ? 1 : -1);
-                    var sel;
-                    var v = this.map(tx, oy);
-                    var h = this.map(ox, ty);
+            chip += this.chipOffset;
+            for (var i = 0; i < 2; i++) {
+                for (var j = 0; j < 2; j++) {
+                    var tx = x + (i == 0 ? -1 : 1);
+                    var ty = y + (j == 0 ? -1 : 1);
+                    var v = this.map(tx, y);
+                    var h = this.map(x, ty);
                     var vh = this.map(tx, ty);
-                    sel = 0;
-                    if (h == n)
+                    var sel = 0;
+                    if (h == chip)
                         sel++;
-                    if (v == n)
+                    if (v == chip)
                         sel += 2;
-                    if (sel == 3 && vh == n)
+                    if (sel == 3 && vh == chip)
                         sel++;
 
-                    c.drawImage(this.image, (sel % this.sep) * tw + tw2 * (i % 2 == 0 ? 1 : 0), Math.floor(sel / this.sep) * th + th2 * (j % 2 == 0 ? 1 : 0), tw2, th2, x * tw + tw2 * (i - 1), y * th + th2 * (j - 1), tw2, th2);
+                    c.drawImage(this.image, (sel % this.sep) * tw + tw2 * i, Math.floor(sel / this.sep) * th + th2 * j, tw2, th2, x * tw + tw2 * i, y * th + th2 * j, tw2, th2);
                 }
             }
+        };
+
+        AutoTileChipSet.prototype.getChips = function () {
+            var len = this.count();
+            var sprite = new jg.Sprite(this.image, this.tile.tileWidth, this.tile.tileHeight);
+
+            return [sprite.createSprite()];
         };
         return AutoTileChipSet;
     })(ChipSet);
@@ -2158,17 +2168,24 @@ var jg;
             for (var x = 0; x < width; x++) {
                 this.data[x] = [];
                 for (var y = 0; y < height; y++)
-                    this.data[x][y] = 0;
+                    this.data[x][y] = -1;
             }
             this.refresh();
         };
 
-        Tile.prototype.generate = function (data, width, height) {
-            this.data = data;
+        Tile.prototype.generate = function (data, width, height, transpose) {
+            if (width === true) {
+                transpose = true;
+                width = data.length;
+                height = data[0].length;
+            }
             if (!width)
-                width = this.data.length;
+                width = data.length;
             if (!height)
-                height = this.data[0].length;
+                height = data[0].length;
+
+            this.data = transpose ? jg.JGUtil.transpose(data) : data;
+
             this._clear(width, height);
             this.refresh();
         };
@@ -2177,8 +2194,13 @@ var jg;
             this.canvas = window.createCanvas(this.width, this.height);
             var c = this.canvas.getContext("2d");
 
-            for (var x = 0; x < this.size.width; x++)
-                for (var y = 0; y < this.size.height; y++)
+            var chipset;
+            var w = this.size.width;
+            var h = this.size.height;
+            var d = this.data;
+            var cm = this.chipMap;
+            for (var x = 0; x < w; x++)
+                for (var y = 0; y < h; y++)
                     this.drawChip(x, y, false, c);
 
             this.updated();
@@ -2267,8 +2289,10 @@ var jg;
             this.x = 0;
             this.y = 0;
             this.scene = scene;
-            this.width = this.scene.game.width;
-            this.height = this.scene.game.height;
+            if (this.scene) {
+                this.width = this.scene.game.width;
+                this.height = this.scene.game.height;
+            }
             this.isUpdated = true;
         }
         Layer.prototype.hasBuffer = function () {
@@ -2545,7 +2569,12 @@ var jg;
 
             this.handler = document.createElement("div");
             this.handler.style.display = "inline-block";
+
+            this.handler.setAttribute("tabindex", "1");
+            this.handler.className = "input-handler";
+            this.handler.style.outline = 'none';
             this.container.appendChild(this.handler);
+            this.handler.focus();
 
             this.changeTransferMode(transferMode ? transferMode : jg.RenderTransferMode.Transfer);
 
@@ -2797,6 +2826,7 @@ var jg;
             for (var _i = 0; _i < (arguments.length - 2); _i++) {
                 args[_i] = arguments[_i + 2];
             }
+            var _this = this;
             this._exit = false;
             this.id = jg.JGUtil.generateId();
             this.width = width;
@@ -2853,6 +2883,14 @@ var jg;
 
             if (document.getElementById("fps_show"))
                 this.fps = document.getElementById("fps_show");
+
+            this.renderer.handler.addEventListener("focus", function () {
+                _this.focus = true;
+            }, false);
+            this.renderer.handler.addEventListener("blur", function () {
+                _this.focus = false;
+            }, false);
+            this.focus = true;
 
             this.setSeed();
 
@@ -2932,6 +2970,8 @@ var jg;
         Game.prototype.onmousedown = function (e) {
             this.isPointDown = true;
             this.eventQueue.push(new jg.InputPointEvent(jg.InputEventAction.Down, e, this.getOffsetByEvent(e)));
+            if (!this.focus)
+                this.renderer.handler.focus();
             e.preventDefault();
         };
 
@@ -2940,6 +2980,9 @@ var jg;
             this.isPointDown = true;
             for (var i = 0, l = touches.length; i < l; i++)
                 this.eventQueue.push(new jg.InputPointEvent(jg.InputEventAction.Down, touches[i], this.getOffsetByEvent(touches[i])));
+
+            if (!this.focus)
+                this.renderer.handler.focus();
 
             e.preventDefault();
         };
@@ -3048,16 +3091,16 @@ var jg;
         Game.prototype.enableKeyboardHandler = function () {
             this.disableKeyboardHandler();
             try  {
-                document.addEventListener("keydown", jg.JGUtil.createIdProxy(this.id, this.onkeydown, this), false);
-                document.addEventListener("keyup", jg.JGUtil.createIdProxy(this.id, this.onkeyup, this), false);
+                this.renderer.handler.addEventListener("keydown", jg.JGUtil.createIdProxy(this.id, this.onkeydown, this), false);
+                this.renderer.handler.addEventListener("keyup", jg.JGUtil.createIdProxy(this.id, this.onkeyup, this), false);
             } catch (ex) {
             }
         };
 
         Game.prototype.disableKeyboardHandler = function () {
             if (jg.JGUtil.getIdProxy(this.id, this.onkeydown, this)) {
-                document.removeEventListener("keydown", jg.JGUtil.getIdProxy(this.id, this.onkeydown, this), false);
-                document.removeEventListener("keyup", jg.JGUtil.getIdProxy(this.id, this.onkeyup, this), false);
+                this.renderer.handler.removeEventListener("keydown", jg.JGUtil.getIdProxy(this.id, this.onkeydown, this), false);
+                this.renderer.handler.removeEventListener("keyup", jg.JGUtil.getIdProxy(this.id, this.onkeyup, this), false);
                 jg.JGUtil.deleteIdProxy(this.id, this.onkeydown, this);
                 jg.JGUtil.deleteIdProxy(this.id, this.onkeyup, this);
             }
@@ -3186,8 +3229,19 @@ var jg;
         };
 
         Game.prototype.end = function () {
+            if (this._exit)
+                return false;
             this.renderer.render();
             this._exit = true;
+            return true;
+        };
+
+        Game.prototype.resume = function () {
+            if (!this._exit)
+                return false;
+            this._exit = false;
+            this.main();
+            return true;
         };
 
         Game.prototype.setPointingEntity = function (param) {
@@ -4781,6 +4835,32 @@ var jg;
     var JGUtil = (function () {
         function JGUtil() {
         }
+        JGUtil.autoStop = function () {
+            var games = [];
+            for (var _i = 0; _i < (arguments.length - 0); _i++) {
+                games[_i] = arguments[_i + 0];
+            }
+            var _this = this;
+            games.forEach(function (game) {
+                game.renderer.handler.addEventListener("focus", JGUtil.proxy(function () {
+                    this.resume();
+                }, game), false);
+                game.renderer.handler.addEventListener("blur", JGUtil.proxy(function () {
+                    this.end();
+                }, game), false);
+
+                if (document.activeElement !== game.renderer.handler) {
+                    var initEnd = function () {
+                        this.end();
+                        game.loaded.remove(this, initEnd);
+                    };
+                    if (game.scene instanceof jg.LoadingScene)
+                        game.loaded.handle(game, initEnd); else
+                        initEnd.call(game);
+                }
+            });
+        };
+
         JGUtil.getCenterPoint = function (p) {
             var a = p;
             if (a.width && a.height) {
@@ -5117,6 +5197,18 @@ var jg;
                 JGUtil.idData = [];
             JGUtil.idData.push(new IdData());
             return JGUtil.idData.length - 1;
+        };
+
+        JGUtil.transpose = function (src) {
+            var ret = new Array(src[0].length);
+            for (var y = 0, ylen = ret.length; y < ylen; y++)
+                ret[y] = new Array(src.length);
+
+            for (var x = 0, xlen = src.length; x < xlen; x++)
+                for (var y = 0, ylen = src[x].length; y < ylen; y++)
+                    ret[y][x] = src[x][y];
+
+            return ret;
         };
         return JGUtil;
     })();

@@ -330,8 +330,8 @@ var jgeditor;
         }
         JgPlaygroundService.prototype.getScriptNames = function () {
             var ret = [];
-            for (var n in this.host.snapshots)
-                ret.push(n);
+            for (var i = 0; i < this.host.snapshots.length; i++)
+                ret.push(this.host.snapshots[i].fileName);
 
             return ret;
         };
@@ -359,7 +359,12 @@ var jgeditor;
             if (this.host.findSnapshot(newName) > -1)
                 return false;
 
+            if (!newName.match(/^[0-9a-zA-Z_\-\.]+$/))
+                return false;
+
             this.host.snapshots[index].fileName = newName;
+            if (name == this.current())
+                this.changeScript(newName);
 
             this.clean();
 
@@ -382,6 +387,9 @@ var jgeditor;
 
         JgPlaygroundService.prototype.addScript = function (name, initScript) {
             if (this.host.findSnapshot(name) >= 0)
+                return false;
+
+            if (!name.match(/^[0-9a-zA-Z_\-\.]+$/))
                 return false;
 
             if (!this.host.addScript(name, initScript))
