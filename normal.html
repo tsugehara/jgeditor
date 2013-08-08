@@ -343,6 +343,32 @@ window.onload = function() {
 			var session = editor.getSession().setUndoManager(new ace.UndoManager());
 			//これだと駄目: editor.getSession().getUndoManager().reset();
 			editor.focus();
+			var extPos = name.lastIndexOf(".");
+			var ext = extPos >= 0 ? name.substr(extPos+1).toLowerCase() : "";
+			switch(ext) {
+				case "html":
+					editor.getSession().setMode("ace/mode/html");
+				break;
+				case "js":
+					editor.getSession().setMode("ace/mode/javascript");
+				break;
+				case "json":
+					editor.getSession().setMode("ace/mode/json");
+				break;
+				case "css":
+					editor.getSession().setMode("ace/mode/css");
+				break;
+				case "txt":
+				case "":
+					editor.getSession().setMode("ace/mode/text");
+				break;
+				case "md":
+					editor.getSession().setMode("ace/mode/markdown");
+				break;
+				default:
+					editor.getSession().setMode("ace/mode/typescript");
+				break;
+			}
 
 			active.removeClass("file-tab-active");
 			target.addClass("file-tab-active");
@@ -376,7 +402,8 @@ window.onload = function() {
 					name: snapshots[i].fileName,
 					buffer: snapshots[i].text
 				});
-				build_txt.push(snapshots[i].fileName);
+				if (snapshots[i].fileName.substr(-3) == ".ts")
+					build_txt.push(snapshots[i].fileName);
 			}
 
 			files.push({
@@ -479,7 +506,7 @@ window.onload = function() {
 	});
 
 	$(".file-add-tab").click(function() {
-		var ret = prompt("追加するファイル名を入力してください。\n拡張子を省略すると.tsがつきます。");
+		var ret = prompt("追加するファイル名を入力してください。\n拡張子を省略すると.tsがつきます。\ntsをつけないとビルド対象外になります（このPlayGround上では意味の無いファイルになります）。");
 		if (! ret)
 			return;
 		if (! f.addScript(null, null, ret)) {

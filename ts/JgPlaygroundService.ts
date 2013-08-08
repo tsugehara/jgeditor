@@ -128,8 +128,9 @@ module jgeditor {
 
 		checkDetailAll():DiagnosticInfo[] {
 			var ret:DiagnosticInfo[] = [];
-			for (var i=0; i<this.host.snapshots.length; i++) {
-				var syntaticDiagnositcs = this.service.getSyntacticDiagnostics(this.host.snapshots[i].fileName);
+			var scripts = this.host.getScriptFileNames();
+			for (var i=0; i<scripts.length; i++) {
+				var syntaticDiagnositcs = this.service.getSyntacticDiagnostics(scripts[i]);
 				if (syntaticDiagnositcs.length) {
 					syntaticDiagnositcs.forEach((diagnostic) => {
 						ret.push(this.host.getDiagnosticInfo(diagnostic));
@@ -138,9 +139,9 @@ module jgeditor {
 				}
 			}
 			var semanticDiagnostics = [];
-			for (var i=0; i<this.host.snapshots.length; i++) {
+			for (var i=0; i<scripts.length; i++) {
 				semanticDiagnostics = semanticDiagnostics.concat(
-					this.service.getSemanticDiagnostics(this.host.snapshots[i].fileName)
+					this.service.getSemanticDiagnostics(scripts[i])
 					|| []
 				);
 			}
@@ -187,17 +188,21 @@ module jgeditor {
 
 		build():string {
 			var files = [];
-			var s = this.host.snapshots;
+			//var s = this.host.snapshots;
 			//Note: 本当はemitAllを使いたいが、typescriptServiceがサポートしておらずcompilerもprivateなので諦める
 			//Note: 多分専用のcompilerを作ってemitAllするよりは、このやり方のがキャッシュがきくので速い
+			var s = this.host.getScriptFileNames();
 			for (var i=0; i<s.length; i++) {
-				var emitOutput = this.service.getEmitOutput(s[i].fileName);
+				if (s[i].substr(-5) == ".d.ts")
+					continue;
+				var emitOutput = this.service.getEmitOutput(s[i]);
 				files = files.concat(emitOutput.outputFiles);
 			}
 			
 			var ret:string[] = [];
 			for (var i=0; i<files.length; i++)
-				ret.push(files[i].text);
+				if (files[i] && files[i].text && files[i].text.length > 0)
+					ret.push(files[i].text);
 
 			return ret.join("\n");
 		}

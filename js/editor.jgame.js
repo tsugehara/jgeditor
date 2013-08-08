@@ -242,7 +242,8 @@ var jgeditor;
                 scripts.push(i + ".d.ts");
 
             for (var i = 0; i < this.snapshots.length; i++)
-                scripts.push(this.snapshots[i].fileName);
+                if (this.snapshots[i].fileName.substr(-3) == ".ts")
+                    scripts.push(this.snapshots[i].fileName);
 
             return scripts;
         };
@@ -304,7 +305,7 @@ var jgeditor;
             var pos = diagnostic.start();
             var index = this.findSnapshot(diagnostic.fileName());
             if (index < 0)
-                return null;
+                return info;
             var snapshot = this.snapshots[index];
 
             var len = snapshot.getLength();
@@ -447,8 +448,9 @@ var jgeditor;
         JgPlaygroundService.prototype.checkDetailAll = function () {
             var _this = this;
             var ret = [];
-            for (var i = 0; i < this.host.snapshots.length; i++) {
-                var syntaticDiagnositcs = this.service.getSyntacticDiagnostics(this.host.snapshots[i].fileName);
+            var scripts = this.host.getScriptFileNames();
+            for (var i = 0; i < scripts.length; i++) {
+                var syntaticDiagnositcs = this.service.getSyntacticDiagnostics(scripts[i]);
                 if (syntaticDiagnositcs.length) {
                     syntaticDiagnositcs.forEach(function (diagnostic) {
                         ret.push(_this.host.getDiagnosticInfo(diagnostic));
@@ -457,8 +459,8 @@ var jgeditor;
                 }
             }
             var semanticDiagnostics = [];
-            for (var i = 0; i < this.host.snapshots.length; i++) {
-                semanticDiagnostics = semanticDiagnostics.concat(this.service.getSemanticDiagnostics(this.host.snapshots[i].fileName) || []);
+            for (var i = 0; i < scripts.length; i++) {
+                semanticDiagnostics = semanticDiagnostics.concat(this.service.getSemanticDiagnostics(scripts[i]) || []);
             }
             if (semanticDiagnostics.length) {
                 semanticDiagnostics.forEach(function (diagnostic) {
@@ -503,16 +505,19 @@ var jgeditor;
 
         JgPlaygroundService.prototype.build = function () {
             var files = [];
-            var s = this.host.snapshots;
 
+            var s = this.host.getScriptFileNames();
             for (var i = 0; i < s.length; i++) {
-                var emitOutput = this.service.getEmitOutput(s[i].fileName);
+                if (s[i].substr(-5) == ".d.ts")
+                    continue;
+                var emitOutput = this.service.getEmitOutput(s[i]);
                 files = files.concat(emitOutput.outputFiles);
             }
 
             var ret = [];
             for (var i = 0; i < files.length; i++)
-                ret.push(files[i].text);
+                if (files[i] && files[i].text && files[i].text.length > 0)
+                    ret.push(files[i].text);
 
             return ret.join("\n");
         };

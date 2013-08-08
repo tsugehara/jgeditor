@@ -131,7 +131,8 @@ module jgeditor {
 				scripts.push(i + ".d.ts");
 			
 			for (var i=0; i<this.snapshots.length; i++)
-				scripts.push(this.snapshots[i].fileName);
+				if (this.snapshots[i].fileName.substr(-3) == ".ts")
+					scripts.push(this.snapshots[i].fileName);
 
 			return scripts;
 		}
@@ -199,7 +200,7 @@ module jgeditor {
 			var pos = diagnostic.start();
 			var index = this.findSnapshot(diagnostic.fileName());
 			if (index < 0)
-				return null;
+				return info;
 			var snapshot = this.snapshots[index];
 
 			var len = snapshot.getLength();

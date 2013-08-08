@@ -1507,34 +1507,31 @@ declare module jg {
     class ChipSet {
         /** 本クラスが管理する画像 */
         public image: any;
-        /** チップの折り返し位置。4x5のチップセット画像であれば4。 */
-        public sep: number;
-        /** このチップセットを親元であるTile */
-        public tile: Tile;
         /** チップのオフセット番号。Tileクラス側が利用する */
         public chipOffset: number;
         /**
         * コンストラクタ
-        * @param tile 親元Tile
         * @param image 対象の画像
         */
-        constructor(tile: Tile, image: any);
+        constructor(image: any);
         /**
         * このChipSetで管理しているチップ数を取得する
         */
-        public count(): number;
+        public count(tile: Tile): number;
         /**
         * 描画する
+        * @param tile 対象のTile
         * @param c 描画対象コンテキスト
         * @param x 描画X座標
         * @param y 描画Y座標
         * @param chip 描画するチップ番号
         */
-        public draw(c: CanvasRenderingContext2D, x: number, y: number, chip: number): void;
+        public draw(tile: Tile, c: CanvasRenderingContext2D, x: number, y: number, chip: number): void;
         /**
         * このChipSetのマップチップを個別に、Spriteの配列として取得する
+        * @param tile 対象のTile
         */
-        public getChips(): jg.Sprite[];
+        public getChips(tile: Tile): jg.Sprite[];
     }
     /**
     * オートタイル用ChipSet。現在は一つの画像で一つのオートタイルのみサポート
@@ -1542,27 +1539,30 @@ declare module jg {
     class AutoTileChipSet extends ChipSet {
         /**
         * 座標位置のチップを取得する便利メソッド。Tile管理外座標である場合-1を返す
+        * @param tile 対象のTile
         * @param x 取得対象x座標
         * @param y 取得対象y座標
         */
-        public map(x: number, y: number): number;
+        public map(tile: Tile, x: number, y: number): number;
         /**
         * このChipSetで管理しているチップ数を取得する。
         * AutoTileChipSetクラスの場合は1固定となる。
         */
-        public count(): number;
+        public count(tile: Tile): number;
         /**
         * 描画する
+        * @param tile 対象のTile
         * @param c 描画対象context
         * @param x 描画X座標
         * @param y 描画Y座標
         * @param chip 描画するチップ番号
         */
-        public draw(c: CanvasRenderingContext2D, x: number, y: number, chip: number): void;
+        public draw(tile: Tile, c: CanvasRenderingContext2D, x: number, y: number, chip: number): void;
         /**
         * このChipSetのマップチップを個別に、Spriteの配列として取得する
+        * @param tile 対象のTile
         */
-        public getChips(): jg.Sprite[];
+        public getChips(tile: Tile): jg.Sprite[];
     }
     /**
     * マップを描画するクラス。
@@ -1602,6 +1602,14 @@ declare module jg {
         * @param opt オプション。{autoTile: true}を指定すると、オートタイルのチップセットが指定可能
         */
         public addChipSet(image: HTMLImageElement, opt?: any): void;
+        /**
+        * 指定したTileのチップセットをこのTileのチップセットと同じにする
+        * @param tile 共有先のTile
+        */
+        public copyChips(tile: Tile): void;
+        /**
+        * サイズなどを指定の値で初期化する汎用メソッド
+        */
         public _clear(width: number, height: number): void;
         /**
         * マップデータをすべて-1で初期化する

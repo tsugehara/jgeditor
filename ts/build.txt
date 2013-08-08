@@ -7,5 +7,6 @@ JgScriptSnapshot.ts
 DiagnosticInfo.ts
 JgPlayground.ts
 JgPlaygroundService.ts
+--disallowbool
 --out ../js/editor.jgame.js
 --declaration

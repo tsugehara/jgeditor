@@ -2019,28 +2019,27 @@ var jg;
 var jg;
 (function (jg) {
     var ChipSet = (function () {
-        function ChipSet(tile, image) {
+        function ChipSet(image) {
             this.image = image;
-            this.tile = tile;
-            this.sep = Math.floor(this.image.width / this.tile.tileWidth);
         }
-        ChipSet.prototype.count = function () {
-            return Math.round((this.image.width * this.image.height) / (this.tile.tileWidth * this.tile.tileHeight));
+        ChipSet.prototype.count = function (tile) {
+            return Math.round((this.image.width * this.image.height) / (tile.tileWidth * tile.tileHeight));
         };
 
-        ChipSet.prototype.draw = function (c, x, y, chip) {
-            var tw = this.tile.tileWidth;
-            var th = this.tile.tileHeight;
-            c.drawImage(this.image, (chip % this.sep) * tw, Math.floor(chip / this.sep) * th, tw, th, x * tw, y * th, tw, th);
+        ChipSet.prototype.draw = function (tile, c, x, y, chip) {
+            var tw = tile.tileWidth;
+            var th = tile.tileHeight;
+            var sep = Math.floor(this.image.width / tile.tileWidth);
+            c.drawImage(this.image, (chip % sep) * tw, Math.floor(chip / sep) * th, tw, th, x * tw, y * th, tw, th);
         };
 
-        ChipSet.prototype.getChips = function () {
-            var len = this.count();
+        ChipSet.prototype.getChips = function (tile) {
+            var len = this.count(tile);
             var sprite = new jg.Sprite(this.image);
             var buf = new jg.BufferedRenderer(sprite);
             var ret = [];
-            var w = this.tile.tileWidth;
-            var h = this.tile.tileHeight;
+            var w = tile.tileWidth;
+            var h = tile.tileHeight;
             var area = {
                 x: 0,
                 y: 0,
@@ -2048,11 +2047,12 @@ var jg;
                 height: h
             };
             buf.renderUnit(sprite);
+            var sep = Math.floor(this.image.width / tile.tileWidth);
 
             for (var i = 0; i < len; i++) {
                 ret.push(buf.createSprite({
-                    x: (i % this.sep) * w,
-                    y: Math.floor(i / this.sep) * h,
+                    x: (i % sep) * w,
+                    y: Math.floor(i / sep) * h,
                     width: w,
                     height: h
                 }, area, area));
@@ -2068,29 +2068,31 @@ var jg;
         function AutoTileChipSet() {
             _super.apply(this, arguments);
         }
-        AutoTileChipSet.prototype.map = function (x, y) {
-            if (x < 0 || y < 0 || x >= this.tile.size.width || y >= this.tile.size.height)
+        AutoTileChipSet.prototype.map = function (tile, x, y) {
+            if (x < 0 || y < 0 || x >= tile.size.width || y >= tile.size.height)
                 return -1;
-            return this.tile.data[x][y];
+            return tile.data[x][y];
         };
 
-        AutoTileChipSet.prototype.count = function () {
+        AutoTileChipSet.prototype.count = function (tile) {
             return 1;
         };
 
-        AutoTileChipSet.prototype.draw = function (c, x, y, chip) {
-            var tw = this.tile.tileWidth;
-            var th = this.tile.tileHeight;
-            var tw2 = Math.floor(this.tile.tileWidth / 2);
-            var th2 = Math.floor(this.tile.tileHeight / 2);
+        AutoTileChipSet.prototype.draw = function (tile, c, x, y, chip) {
+            var tw = tile.tileWidth;
+            var th = tile.tileHeight;
+            var tw2 = Math.floor(tw / 2);
+            var th2 = Math.floor(th / 2);
+            var sep = Math.floor(this.image.width / tile.tileWidth);
+
             chip += this.chipOffset;
             for (var i = 0; i < 2; i++) {
                 for (var j = 0; j < 2; j++) {
                     var tx = x + (i == 0 ? -1 : 1);
                     var ty = y + (j == 0 ? -1 : 1);
-                    var v = this.map(tx, y);
-                    var h = this.map(x, ty);
-                    var vh = this.map(tx, ty);
+                    var v = this.map(tile, tx, y);
+                    var h = this.map(tile, x, ty);
+                    var vh = this.map(tile, tx, ty);
                     var sel = 0;
                     if (h == chip)
                         sel++;
@@ -2099,14 +2101,14 @@ var jg;
                     if (sel == 3 && vh == chip)
                         sel++;
 
-                    c.drawImage(this.image, (sel % this.sep) * tw + tw2 * i, Math.floor(sel / this.sep) * th + th2 * j, tw2, th2, x * tw + tw2 * i, y * th + th2 * j, tw2, th2);
+                    c.drawImage(this.image, (sel % sep) * tw + tw2 * i, Math.floor(sel / sep) * th + th2 * j, tw2, th2, x * tw + tw2 * i, y * th + th2 * j, tw2, th2);
                 }
             }
         };
 
-        AutoTileChipSet.prototype.getChips = function () {
-            var len = this.count();
-            var sprite = new jg.Sprite(this.image, this.tile.tileWidth, this.tile.tileHeight);
+        AutoTileChipSet.prototype.getChips = function (tile) {
+            var len = this.count(tile);
+            var sprite = new jg.Sprite(this.image, tile.tileWidth, tile.tileHeight);
 
             return [sprite.createSprite()];
         };
@@ -2133,20 +2135,26 @@ var jg;
             var chipset;
             if (opt) {
                 if (opt.autoTile) {
-                    chipset = new AutoTileChipSet(this, image);
+                    chipset = new AutoTileChipSet(image);
                 }
             }
 
             if (!chipset)
-                chipset = new ChipSet(this, image);
+                chipset = new ChipSet(image);
 
             chipset.chipOffset = this.chipCount;
             this.chips.push(chipset);
-            var cnt = chipset.count();
+            var cnt = chipset.count(this);
             var cnt2 = this.chipCount + cnt;
             for (var i = this.chipCount; i < cnt2; i++)
                 this.chipMap[i] = chipset;
             this.chipCount = cnt2;
+        };
+
+        Tile.prototype.copyChips = function (tile) {
+            tile.chips = this.chips;
+            tile.chipCount = this.chipCount;
+            tile.chipMap = this.chipMap;
         };
 
         Tile.prototype._clear = function (width, height) {
@@ -2216,7 +2224,7 @@ var jg;
             if (this.data[x][y] < 0)
                 return;
             var cs = this.chipMap[this.data[x][y]];
-            cs.draw(context, x, y, this.data[x][y] - cs.chipOffset);
+            cs.draw(this, context, x, y, this.data[x][y] - cs.chipOffset);
         };
 
         Tile.prototype.draw = function (context) {
@@ -2272,7 +2280,7 @@ var jg;
             var ret = [];
             var len = this.chips.length;
             for (var i = 0; i < len; i++)
-                ret = ret.concat(this.chips[i].getChips());
+                ret = ret.concat(this.chips[i].getChips(this));
             return ret;
         };
         return Tile;
