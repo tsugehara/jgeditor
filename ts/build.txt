@@ -1,5 +1,7 @@
+jgame.d.ts
+jquery.d.ts
 tsc-dummy.d.ts
-editor.ts
+jgeditor.ts
 DefineLoader.ts
 JgDiagnostics.ts
 LogSetting.ts
@@ -7,6 +9,12 @@ JgScriptSnapshot.ts
 DiagnosticInfo.ts
 JgPlayground.ts
 JgPlaygroundService.ts
+IEditorMessages.ts
+AceSessionManager.ts
+Editor.ts
+JavaScriptEditor.ts
+TypeScriptEditor.ts
+ShortcutManager.ts
 --disallowbool
 --out ../js/editor.jgame.js
 --declaration

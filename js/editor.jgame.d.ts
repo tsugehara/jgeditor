@@ -94,7 +94,7 @@ declare module jgeditor {
         public host: jgeditor.JgPlayground;
         public defines: jgeditor.DefineFile[];
         public beforeCharIndex: number;
-        constructor(defines: jgeditor.DefineFile[], initScript?: string);
+        constructor(defines?: jgeditor.DefineFile[], initScript?: string);
         public getScriptNames(): string[];
         public scriptCount(): number;
         public current(): string;
@@ -114,5 +114,160 @@ declare module jgeditor {
         public getSignature(charIndex?: number): Services.SignatureInfo;
         public getCompilationDetail(name: string, charIndex?: number): Services.CompletionEntryDetails;
         public getCompilation(matchText: string, charIndex: number, noMember?: boolean): Services.CompletionEntry[];
+    }
+}
+declare module jgeditor {
+    interface IEditorMessages {
+        add_tab_prompt: string;
+        remove_tab_confirm: string;
+        rename_tab_prompt: string;
+    }
+}
+declare module jgeditor {
+    interface AceSession {
+        name: string;
+        session: any;
+    }
+    class AceSessionManager {
+        public sessions: AceSession[];
+        constructor();
+        public rename(name: string, newName: string): void;
+        public remove(name: string): void;
+        public find(name: string): number;
+        public get(name: string, value?: string);
+    }
+}
+declare module jgeditor {
+    class Editor {
+        public id: string;
+        public editor: any;
+        public game_container_id: string;
+        public ace_session: jgeditor.AceSessionManager;
+        public file_sortable: JQuery;
+        public default_ext: string;
+        public menu_binder: any;
+        public _changing_script: boolean;
+        public messages: jgeditor.IEditorMessages;
+        public activated_contextmenu: boolean;
+        public tab_rename: jg.Trigger;
+        public tab_renamed: jg.Trigger;
+        public tab_remove: jg.Trigger;
+        public tab_removed: jg.Trigger;
+        public tab_change: jg.Trigger;
+        public tab_changed: jg.Trigger;
+        public tab_add: jg.Trigger;
+        public tab_added: jg.Trigger;
+        public zip_start: jg.Trigger;
+        public zip_ended: jg.Trigger;
+        public sorted: jg.Trigger;
+        public run_start: jg.Trigger;
+        public run_end: jg.Trigger;
+        public run_stop: jg.Trigger;
+        constructor(id: string);
+        public getNextTab(): JQuery;
+        public getPrevTab(): JQuery;
+        public keyhandlerForIframe(e: any): void;
+        public keyhandleForIframe(): void;
+        public run(url: string): void;
+        public setTheme(theme: string): void;
+        public setMode(mode: string): void;
+        public getSesssion(): any;
+        public setSession(session: any): void;
+        public getValue(): string;
+        public focus(): boolean;
+        public focusGame(): boolean;
+        public stopGame(): boolean;
+        public zip(btn: HTMLElement): void;
+        public activateFileContextMenu(): void;
+        public activateSortable(file_sortable?: JQuery): void;
+        public activateAddTabUI(add_tab_btn: JQuery, ext_message?: string): void;
+        public removeTabConfirm(target?: string): boolean;
+        public renameTabPrompt(target?: string): boolean;
+        public addTabPrompt(): boolean;
+        public currentTab(): string;
+        public changeTab(name: string): boolean;
+        public changeToNextTab(): boolean;
+        public changeToPrevTab(): boolean;
+        public addTab(name: string, value?: string): boolean;
+        public renameTab(name: string, newName: string): void;
+        public removeTab(name: string): void;
+        public addInfo(text: string, background: string): void;
+        public clearInfo(): void;
+        public _createMessage(mes: string, message_type?: string, extension?: boolean): string;
+        public _isUniqueName(name: string): boolean;
+        public _isValidName(name: string): {};
+        public _getName(name: string): string;
+        public _getExtension(name: string): string;
+    }
+}
+declare module jgeditor {
+    interface JavaScriptFile {
+        name: string;
+        value: string;
+    }
+    class JavaScriptEditor extends jgeditor.Editor {
+        public scripts: JavaScriptFile[];
+        public current: JavaScriptFile;
+        constructor(id: string);
+        public onTabChange(e: any): void;
+        public onTabChanged(e: any): void;
+        public onTabAdded(e: any): void;
+        public onTabRemove(e: any): void;
+        public onTabRemoved(e: any): void;
+        public onTabRenamed(e: any): void;
+        public onZipStart(e: any): void;
+        public onZipEnded(e: any): void;
+        public findScript(name: string): number;
+        public updateScript(): void;
+        public getScript(): string;
+    }
+}
+declare module jgeditor {
+    class TypeScriptEditor extends jgeditor.Editor {
+        public define_loader: jgeditor.DefineLoader;
+        public playground: jgeditor.JgPlaygroundService;
+        public error_console: JQuery;
+        public output: JQuery;
+        public auto_complete: any;
+        public define_loaded: jg.Trigger;
+        constructor(id: string);
+        public loadDefines(...files: string[]): void;
+        public clean(): void;
+        public check(callback?: () => void): void;
+        public build(): void;
+        public clearError(text?: string): void;
+        public addError(diagnostic: jgeditor.DiagnosticInfo): void;
+        public activateSelectDefineDialog(tab: JQuery, dialog: JQuery, defines: JQuery): void;
+        public activateAutoComplete(): void;
+        public updateScript(): void;
+        public getScript();
+        public onTabChange(e: any): void;
+        public onTabChanged(e: any): void;
+        public onTabAdded(e: any): void;
+        public onTabRemove(e: any): void;
+        public onTabRemoved(e: any): void;
+        public onTabRenamed(e: any): void;
+        public onZipStart(e: any): void;
+        public onZipEnded(e: any): void;
+    }
+}
+declare module jgeditor {
+    interface Shortcut {
+        target: any;
+        method: any;
+        description: string;
+        params?: any;
+        key: string;
+    }
+    class ShortcutManager {
+        public editor: jgeditor.Editor;
+        public key: any;
+        public shortcuts: Shortcut[];
+        constructor(editor: jgeditor.Editor);
+        public add(key: string, method: any, description?: string, target?: any, params?: any): void;
+        public _activate(shortcut: Shortcut): void;
+        public activate(): void;
+        public getHelpMessage(): string;
+        public showHelp(): void;
     }
 }

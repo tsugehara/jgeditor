@@ -421,6 +421,7 @@ var jg;
         translate: { x: 0, y: 0 },
         transform: { m11: 1, m12: 0, m21: 0, m22: 1, dx: 0, dy: 0 },
         scale: { x: 1, y: 1 },
+        purescale: { x: 1, y: 1 },
         globalAlpha: undefined,
         font: undefined,
         fillStyle: undefined,
@@ -2068,9 +2069,9 @@ var jg;
         function AutoTileChipSet() {
             _super.apply(this, arguments);
         }
-        AutoTileChipSet.prototype.map = function (tile, x, y) {
+        AutoTileChipSet.prototype.map = function (tile, x, y, out_value) {
             if (x < 0 || y < 0 || x >= tile.size.width || y >= tile.size.height)
-                return -1;
+                return out_value !== undefined ? out_value : -1;
             return tile.data[x][y];
         };
 
@@ -2090,9 +2091,9 @@ var jg;
                 for (var j = 0; j < 2; j++) {
                     var tx = x + (i == 0 ? -1 : 1);
                     var ty = y + (j == 0 ? -1 : 1);
-                    var v = this.map(tile, tx, y);
-                    var h = this.map(tile, x, ty);
-                    var vh = this.map(tile, tx, ty);
+                    var v = this.map(tile, tx, y, chip);
+                    var h = this.map(tile, x, ty, chip);
+                    var vh = this.map(tile, tx, ty, chip);
                     var sel = 0;
                     if (h == chip)
                         sel++;
@@ -2166,17 +2167,19 @@ var jg;
             this.height = this.tileHeight * height;
         };
 
-        Tile.prototype.clear = function (width, height) {
+        Tile.prototype.clear = function (width, height, value) {
             if (!width)
                 width = this.size.width;
             if (!height)
                 height = this.size.height;
+            if (value === undefined)
+                value = -1;
             this._clear(width, height);
             this.data = [];
             for (var x = 0; x < width; x++) {
                 this.data[x] = [];
                 for (var y = 0; y < height; y++)
-                    this.data[x][y] = -1;
+                    this.data[x][y] = value;
             }
             this.refresh();
         };
@@ -2444,6 +2447,9 @@ var jg;
                 },
                 scale: function (c, entity, params) {
                     c.transform.apply(c, _this.getMatrix(entity.width, entity.height, params.x, params.y, 0));
+                },
+                purescale: function (c, entity, params) {
+                    c.scale(params.x, params.y);
                 },
                 rotate: function (c, entity, params) {
                     c.transform.apply(c, _this.getMatrix(entity.width, entity.height, 1, 1, params));

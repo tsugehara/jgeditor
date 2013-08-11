@@ -2,66 +2,27 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>jgeditor</title>
-<style type="text/css" media="screen">
-.container {
-	width:100%;
-	position:relative;
-}
-.full {
-	margin-right: 484px;
-}
-.right {
-	width:484px;
-	position:absolute;
-	right:0;
-	top:0;
-	padding:0;
-	margin:0;
-	border:0;
-}
-#editor { 
-	height:484px;
-}
-.game-container {
-	width: 484px;
-	height:484px;
-	border: 1px solid black;
-}
-#error-console {
-	width:100%;
-	height:120px;
-}
-#output {
-	width:100%;
-	height:120px;
-}
-.l {
-	float:left;
-}
-.r {
-	float:right;
-}
-.c {
-	clear:both;
-}
-</style>
-<script type="text/javascript" src="js//ts/typescript.js"></script>
+<title>game.js PlayGround - JavaScript版</title>
+<link href="css/redmond/jquery-ui-1.10.2.custom.min.css" rel="stylesheet">
+<link href="css/standard.css" rel="stylesheet">
+<script type="text/javascript" src="js/keymaster.min.js"></script>
 <script type="text/javascript" src="js/ace/ace.js"></script>
-<script type="text/javascript" src="js/editor.jgame.js"></script>
+<script type="text/javascript" src="js/jquery-1.9.1.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.10.2.custom.min.js"></script>
+<script type="text/javascript" src="js/jquery.contextmenu.r2.packed.js"></script>
 <script type="text/javascript" src="js/jgame.js"></script>
+<script type="text/javascript" src="js/editor.jgame.js"></script>
+<script type="text/javascript" src="js/zip/jsziptools.min.js"></script>
 <script type="text/javascript">
 var editor;
+var shortcut;
 (function() {
 window.onload = function() {
-	editor = ace.edit("editor");
+	editor = new jgeditor.JavaScriptEditor("editor");
 	editor.setTheme("ace/theme/monokai");
-	editor.getSession().setMode("ace/mode/javascript");
 
-	var f = window.editorFunc = {}
-
-	f.run = function() {
-		var prog = editor.getValue();;
+	var save = function(callback, error_callback) {
+		var prog = editor.getScript();
 		if (! prog) {
 			alert("コードが存在しません。");
 			return;
@@ -69,35 +30,65 @@ window.onload = function() {
 		var request = new XMLHttpRequest();
 		request.open("POST", "save.php");
 		request.send(prog);
-		request.onload = function() {
-			document.getElementById("jgame-con").src = "load.php?"+(new Date()).getTime();
-		}
-		request.onerror = function() {
-
+		request.onload = callback;
+		if (! error_callback) {
+			request.onerror = function() {
+				alert("エラー");
+			}
+		} else {
+			request.onerror = error_callback;
 		}
 	}
-	f.stop = function() {
-		document.getElementById("jgame-con").src = "about:blank"
+	editor.preview = function() {
+		editor.updateScript();
+		save(function() {
+			editor.run("load.php");
+		});
+		return true;
+	}
+	editor.runOnWindow = function() {
+		var w = window.open("about:blank");
+		save(function() {
+			w.location.href = "load.php?"+(new Date()).getTime();
+		});
+		return true;
 	}
 
-    editor.commands.addCommands([{
-        name: "run",
-        bindKey: "Ctrl-R",
-        exec: f.run
-    }]);
-    editor.commands.addCommands([{
-        name: "stop",
-        bindKey: "Ctrl-Shift-R",
-        exec: f.stop
-    }]);
+	shortcut = new jgeditor.ShortcutManager(editor);
+	shortcut.add("⌘+r,ctrl+r", "preview", "プレビュー");
+	shortcut.add("⌘+shift+r,ctrl+shift+r", "stopGame", "停止");
+	shortcut.add("⌘+alt+r,ctrl+alt+r", "runOnWindow", "別ウィンドウで実行");
+	shortcut.add("alt+f", "focusGame", "ゲームにフォーカス");
+	shortcut.add("alt+shift+f", "focus", "エディタにフォーカス");
+	shortcut.add("⌘+down,ctrl+down", "changeToNextTab", "次のタブ");
+	shortcut.add("⌘+up,ctrl+up", "changeToPrevTab", "前のタブ");
+	shortcut.add("alt+n", "addTabPrompt", "新規ファイル");
+	shortcut.add("f2", "renameTabPrompt", "ファイル名変更");
+	shortcut.add("⌘+del,ctrl+del", "removeTabConfirm", "ファイル削除");
+	shortcut.add("alt+h", "showHelp", "ヘルプ", shortcut);
+	shortcut.activate();
 
+	editor.addTab("main.js", editor.getValue());
+	editor.changeTab("main.js");
+
+	editor.activateSortable();
+	editor.activateAddTabUI($(".file-add-tab"), "（jsファイル以外はこのPlayGroundでは機能しません）");
+	editor.activateFileContextMenu();
+
+	editor.keyhandleForIframe();
+	editor.focus();
 }
 })();
 </script>
 </head>
 <body>
+<div class="files">
+	<div class="file-sortable"></div>
+	<div class="file-tab file-add-tab">+</div><div class="c"></div>
+</div>
 <div class="container">
-	<div id="editor" class="full">window.onload = function() {
+	<div class="full">
+		<div id="editor">window.onload = function() {
     var game = new jg.Game(480, 480);
     game.preload({logo: "http://jgame-js.sourceforge.jp/img/logo-m.png"});
     game.loaded.handle(function() {
@@ -124,20 +115,33 @@ window.onload = function() {
                 time: 1000
             }).loop()
         }
-    });	
+    });
 }</div>
+	</div>
 	<div class="right">
 		<iframe id="jgame-con" class="game-container"></iframe>
 	</div>
 </div>
 <div>
-	<input type="button" value="実行(Ctrl+R)" onclick="window.editorFunc.run()" />
-	<input type="button" value="停止(Ctrl+Shift+R)" onclick="window.editorFunc.stop()" />
+	<div>
+		<input type="button" value="実行" onclick="editor.preview()" title="Ctrl+R" />
+		<input type="button" value="停止" onclick="editor.stopGame()" title="Ctrl+Shift+R" />
+		<input type="button" value="フォーカス" onclick="editor.focusGame()" title="Alt+F" />
+		<input type="button" value="別ウィンドウで実行" onclick="editor.runOnWindow()" title="Ctrl+Alt+R" />
+		<input id="zip-button" type="button" value="ZIP生成" onclick="editor.zip(document.getElementById('zip-button'))" />
+		<input type="button" value="ヘルプ" onclick="shortcut.showHelp()" title="Alt+H"/>
+	</div>
 </div>
 <div>
 	<p>
 		<a href="http://jgame-js.sourceforge.jp/">jgame.jsのサンプル</a>を見ながら、検証してみたいコードを追加してみるのが、お勧めの学習方法です。
 	</p>
+</div>
+<div id="file-menu" class="contextMenu">
+	<ul>
+		<li id="file-menu-change-name">名前の変更</li>
+		<li id="file-menu-remove">削除</li>
+	</ul>
 </div>
 </body>
 </html>

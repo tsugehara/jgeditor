@@ -2,33 +2,10 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>jgeditor</title>
+<title>jgame.js PlayGround - TypeScript版</title>
 <link href="css/redmond/jquery-ui-1.10.2.custom.min.css" rel="stylesheet">
+<link href="css/standard.css" rel="stylesheet">
 <style type="text/css" media="screen">
-.container {
-	width:100%;
-	position:relative;
-}
-.full {
-	margin-right: 484px;
-}
-.right {
-	width:484px;
-	position:absolute;
-	right:0;
-	top:0;
-	padding:0;
-	margin:0;
-	border:0;
-}
-#editor { 
-	height:484px;
-}
-.game-container {
-	width: 484px;
-	height:484px;
-	border: 0;
-}
 #error-console {
 	width:100%;
 	height:120px;
@@ -47,51 +24,12 @@
 	width:100%;
 	height:120px;
 }
-.files {
-	margin: 0 0 1ex 0;
-}
-.file-tab {
-	float: left;
-	color: #666;
-	background-color: #fff;
-	border: 1px solid #666;
-	padding: 2px 4px;
-	margin: 0 1px 1px 0;
-	font-size:80%;
-
-	-moz-border-radius-topleft: 4px;
-	-webkit-border-top-left-radius: 4px;
-	-khtml-border-top-left-radius: 4px;
-	border-top-left-radius: 4px;
-
-	-moz-border-radius-topright: 4px;
-	-webkit-border-top-right-radius: 4px;
-	-khtml-border-top-right-radius: 4px;
-	border-top-right-radius: 4px;
-
-	-moz-border-radius-bottomleft: 4px;
-	-webkit-border-bottom-left-radius: 4px;
-	-khtml-border-bottom-left-radius: 4px;
-	border-bottom-left-radius: 4px;
-
-	-moz-border-radius-bottomright: 4px;
-	-webkit-border-bottom-right-radius: 4px;
-	-khtml-border-bottom-right-radius: 4px;
-	border-bottom-right-radius: 4px;
-}
-.file-tab:hover, .file-tab-active {
-	background-color: #666;
-	color: #fff;
-}
 #file-defines {
 	width: 100%;
 	height: 100px;
 }
-.c {
-	clear:both;
-}
 </style>
-<script type="text/javascript" src="js/keymaster.js"></script>
+<script type="text/javascript" src="js/keymaster.min.js"></script>
 <script type="text/javascript" src="js/ts/typescriptServices.js"></script>
 <script type="text/javascript" src="js/jquery-1.9.1.js"></script>
 <script type="text/javascript" src="js/jquery-ui-1.10.2.custom.min.js"></script>
@@ -102,470 +40,91 @@
 <script type="text/javascript" src="js/editor.jgame.js"></script>
 <script type="text/javascript" src="js/jgame.js"></script>
 <script type="text/javascript" src="js/zip/jsziptools.min.js"></script>
-
 <script type="text/javascript">
-var f;
+var editor;
+var shortcut;
 (function() {
 window.onload = function() {
-	editor = ace.edit("editor");
+	editor = new jgeditor.TypeScriptEditor("editor");
 	editor.setTheme("ace/theme/monokai");
-	editor.getSession().setMode("ace/mode/typescript");
-	var loading = true;
 
-	var AutoComplete = require("autocomplete").AutoComplete;
-	var autoComplete;
-
-	var defines = new jgeditor.DefineLoader();
-	defines.load("define/ecmascript-api.d.ts");
-	defines.load("define/dom-for-jgamejs.d.ts");
-	defines.load("define/jgame.d.ts");
-	var playground;
-	defines.onload = function() {
-		loading = false;
-		playground = new jgeditor.JgPlaygroundService(defines.d, editor.getValue());
-		f.addTab(playground.current());
-		playground.build();
-		$(".file-tab:contains("+playground.current()+")").addClass("file-tab-active");
-		autoComplete = new AutoComplete(editor, playground.current(), playground);
-		f.build();
-	}
-	defines.onerror = function(error_define) {
-		alert(error_define+"の読み込みに失敗しました");
-	}
-
-	var error_console = $("#error-console");
-	f  = {
-		focus: function() {
-			var con = document.getElementById("jgame-con");
-			var w = con.contentWindow || con;
-			try {
-				var container = w.document.getElementById("jgame");
-				var childs = container.childNodes;
-				for (var i=0; i<childs.length; i++) {
-					if (childs[i].className == "input-handler") {
-						childs[i].focus();
-						return;
-					}
-				}
-			} catch(ex) {
-			}
-
-			w.focus();
-		},
-		clearError: function(text) {
-			error_console.html(text ? text : "");
-		},
-		addError: function(diagnostic) {
-			var row = $("<div/>");
-			//diagnostic.file
-			if (diagnostic.line !== undefined && diagnostic.line !== null) {
-				if (playground.scriptCount() == 1)
-					row.text(diagnostic.line + ": "+ diagnostic.message);
-				else
-					row.text(diagnostic.file + " " +diagnostic.line + ": "+ diagnostic.message);
-				row.click(function() {
-					if (playground.current() != diagnostic.file)
-						f.changeScript(null, null, diagnostic.file);
-					editor.clearSelection();
-					editor.moveCursorTo(diagnostic.line-1, diagnostic.rowpos);
-					editor.focus();
-				});
-			} else {
-				row.text(diagnostic.message);
-			}
-			error_console.append(row);
-		},
-		menu_binder: {
-			"file-menu-change-name": function(e) {
-				var n = $(e).text();
-				var ret = prompt("変更後の名前を入力してください。", n);
-				if (!ret)
-					return;
-
-				if (ret.indexOf(".") == -1)
-					ret += ".ts";
-
-				if (! playground.renameScript(n, ret))
-					alert("エラー");
-				else
-					$(e).text(ret);
-			},
-			"file-menu-remove": function(e) {
-				var n = $(e).text();
-				if (! confirm(n+"を削除します。\n本当によろしいですか？"))
-					return;
-				if (! playground.removeScript(n)) {
-					alert("エラー");
-					return;
-				}
-				var is_current = $(e).hasClass("file-tab-active");
-				$(e).remove();
-				if (is_current)
-					f.changeScript(null, null, $($(".file-sortable .file-tab")[0]).text());
-			}
-		},
-		_check: function(errors) {
-			f.clearError();
-			if (errors.length == 0)
-				error_console.text("No error!");
-			else
-				for (var i=0; i<errors.length; i++)
-					f.addError(errors[i]);
-		},
-		check: function(sender, e, callback) {
-			if (loading)
-				return null;
-			f.clearError("checking...");
-			playground.updateScript(editor.getValue());
-
+	editor.loadDefines(
+		"define/ecmascript-api.d.ts",
+		"define/dom-for-jgamejs.d.ts",
+		"define/jgame.d.ts"
+	);
+	var first = true;
+	editor.define_loaded.handle(function() {
+		editor.clean();
+		if (first) {
+			editor.addTab("main.ts", editor.getValue());
+			editor.changeTab("main.ts");
 			setTimeout(function() {
-				var errors = playground.checkDetailAll();
-				f._check(errors);
+				editor.build();
+			}, 20);
+		}
+	});
 
-				if (callback)
-					callback();
-			}, 16);
-			return true;
-		},
-		build: function(sender, e) {
-			if (loading)
-				return null;
-			document.getElementById("output").value = "";
-			var callback = function() {
-				document.getElementById("output").value = playground.build();
-			}
-			if (! f.check(sender, e, callback))
-				return null;
-		},
-		_onload: function(con) {
-			f.focus();
-			f.keyhandleForIframe(con);
-		},
-		run: function(sender, e) {
-			if (loading)
-				return;
-			var prog = document.getElementById("output").value;
-			if (! prog) {
-				alert("ビルド済みのコードが存在しません。");
-				return;
-			}
-			var request = new XMLHttpRequest();
-			request.open("POST", "save.php");
-			request.send(prog);
-			request.onload = function() {
-				var con = document.getElementById("jgame-con");
-				editor.focus();
-				con.src = "load.php?"+(new Date()).getTime();
-				con.onload = function() {
-					f.focus();
-					f.keyhandleForIframe(con);
-				}
-			}
+	var save = function(callback, error_callback) {
+		var prog = editor.getScript();
+		if (! prog) {
+			alert("ビルド済みのコードが存在しません。");
+			return;
+		}
+		var request = new XMLHttpRequest();
+		request.open("POST", "save.php");
+		request.send(prog);
+		request.onload = callback;
+		if (! error_callback) {
 			request.onerror = function() {
 				alert("エラー");
 			}
-		},
-		run_window: function(sender, e) {
-			if (loading)
-				return;
-			var prog = document.getElementById("output").value;
-			if (! prog) {
-				alert("ビルド済みのコードが存在しません。");
-				return;
-			}
-			var request = new XMLHttpRequest();
-			request.open("POST", "save.php");
-			request.send(prog);
-			var w = window.open("about:blank");
-			request.onload = function() {
-				w.location.href = "load.php?"+(new Date()).getTime()
-			}
-			request.onerror = function() {
-				alert("エラー");
-			}
-		},
-		stop: function(sender, e) {
-			editor.focus();
-			document.getElementById("jgame-con").src = "about:blank"
-		},
-		addTab: function(name) {
-			if (! name)
-				return false;
-			if (name.indexOf(".") < 0)
-				name += ".ts";
-
-			$(".file-sortable").append(
-				$("<div/>").addClass("file-tab").text(name).click(function(e) {
-					f.changeScript(null, null, $(this).text());
-				}).contextMenu("file-menu", {
-					bindings: f.menu_binder
-				})
-			);
-		},
-		addScript: function(sender, e, name) {
-			if (! name)
-				return false;
-			if (name.indexOf(".") < 0)
-				name += ".ts";
-
-			if (! name.match(/^[0-9a-zA-Z_\-\.]+$/))
-				return false;
-
-			if (! playground.addScript(name, ""))
-				return false;
-
-			f.addTab(name);
-
-			return true;
-		},
-		changeScript: function(sender, e, name) {
-			if (name.indexOf(".") < 0)
-				name += ".ts";
-
-			var active = $(".file-tab-active");
-			if (active.text() == name)
-				return false;
-
-			var target = $(".file-tab:contains("+name+")");
-			if (target.length == 0)
-				return false;
-
-			if (playground.updateScript(editor.getValue())) {
-				f.clearError("checking...");
-				var errors = playground.checkDetail();
-				f._check(errors);
-			}
-			playground.changeScript(name);
-			var tmp = playground.getScript();
-			editor.setValue(tmp);
-			editor.moveCursorTo(0, 0);
-			editor.clearSelection();
-			var session = editor.getSession().setUndoManager(new ace.UndoManager());
-			//これだと駄目: editor.getSession().getUndoManager().reset();
-			editor.focus();
-			var extPos = name.lastIndexOf(".");
-			var ext = extPos >= 0 ? name.substr(extPos+1).toLowerCase() : "";
-			switch(ext) {
-				case "html":
-					editor.getSession().setMode("ace/mode/html");
-				break;
-				case "js":
-					editor.getSession().setMode("ace/mode/javascript");
-				break;
-				case "json":
-					editor.getSession().setMode("ace/mode/json");
-				break;
-				case "css":
-					editor.getSession().setMode("ace/mode/css");
-				break;
-				case "txt":
-				case "":
-					editor.getSession().setMode("ace/mode/text");
-				break;
-				case "md":
-					editor.getSession().setMode("ace/mode/markdown");
-				break;
-				default:
-					editor.getSession().setMode("ace/mode/typescript");
-				break;
-			}
-
-			active.removeClass("file-tab-active");
-			target.addClass("file-tab-active");
-		},
-		keyhandlerForIframe: function(e) {
-			key.dispatch(e);
-		},
-		keyhandleForIframe: function(con) {
-			con.contentWindow.removeEventListener("keydown", f.keyhandlerForIframe, false);
-			con.contentWindow.addEventListener("keydown", f.keyhandlerForIframe, false);
-		},
-		zip: function(sender) {
-			var snapshots = playground.host.snapshots;
-			var defines = playground.defines;
-			var files = [];
-			var build_txt = [];
-			build_txt.push("--nolib");
-			build_txt.push("--disallowbool");
-			build_txt.push("--target ES5");
-			build_txt.push("--out out.js");
-			for (var i=0; i<defines.length; i++) {
-				files.push({
-					name: defines[i].name,
-					buffer: defines[i].value
-				});
-				build_txt.push(defines[i].name);
-			}
-
-			for (var i=0; i<snapshots.length; i++) {
-				files.push({
-					name: snapshots[i].fileName,
-					buffer: snapshots[i].text
-				});
-				if (snapshots[i].fileName.substr(-3) == ".ts")
-					build_txt.push(snapshots[i].fileName);
-			}
-
-			files.push({
-				name: "build.txt",
-				buffer: build_txt.join("\n")
-			});
-			files.push({
-				name: "build.bat",
-				buffer: "tsc @build.txt\npause"
-			});
-
-			jz.zip.pack({
-				files: files,
-				level: 5
-			}).done(function(buffer) {
-				var binary = ''
-				var bytes = new Uint8Array( buffer )
-				var len = bytes.byteLength;
-				for (var i = 0; i < len; i++)
-					binary += String.fromCharCode( bytes[ i ] )
-
-				var base64String = window.btoa( binary );
-				$("#download-link").remove();
-				var a = $("<a/>")
-					.attr("download", "source.zip")
-					.attr("href", "data:application/zip;base64,"+base64String)
-					.attr("id", "download-link")
-					.text("ダウンロード")
-					.click(function() {
-						a.remove();
-						var browser = jg.JGUtil.getBrowser();
-						if (browser.msie) {
-							alert("IEではZIPダウンロードが出来ません");
-						}
-					});
-				a.insertAfter($(sender));
-			}).fail(function() {
-				alert("エラー");
-			});
+		} else {
+			request.onerror = error_callback;
 		}
 	}
-
-	var bindKey = function(win, mac) {
-		return {
-			win: win,
-			mac: mac
-		}
-	}
-	key('⌘+r, ctrl+r', function(event, handler){
-		f.run(handler, event);
-		return false;
-	});
-	key('⌘+shift+r, ctrl+shift+r', function(event, handler){
-		f.stop(handler, event);
-		return false;
-	});
-	key('⌘+b, ctrl+b', function(event, handler){
-		f.build(handler, event);
-		return false;
-	});
-	key('⌘+s, ctrl+s', function(event, handler){
-		f.check(handler, event);
-		return false;
-	});
-	key('⌘+down, ctrl+down', function(event, handler){
-		if ($(".file-sortable").find(".file-tab").length == 0)
-			return true;
-		var next = $(".file-tab-active").next(".file-tab");
-		if (next.length == 0)
-			next = $(".file-sortable .file-tab:first");
-		f.changeScript(null, null, next.text());
-		return false;
-		return false;
-	});
-	key('⌘+up, ctrl+up', function(event, handler){
-		if ($(".file-sortable").find(".file-tab").length == 0)
-			return true;
-		var prev = $(".file-tab-active").prev(".file-tab");
-		if (prev.length == 0)
-			prev = $(".file-sortable .file-tab:last");
-		f.changeScript(null, null, prev.text());
-		return false;
-	});
-
-	editor.addEventListener("mousedown", function() {
-		if (autoComplete.isActive())
-			autoComplete.deactivate();
-	});
-	editor.commands.addCommand({
-		name: "autocomplete",
-		bindKey: bindKey("Ctrl-Space", "Command-Space"),
-		exec: function(editor) {
-			if (autoComplete.isActive() == false) {
-				var pos = editor.getCursorPosition();
-				var charIndex = editor.getSession().getDocument().positionToIndex(pos);
-				playground.updateScript(editor.getValue());
-				autoComplete.active();
-			}
-		}
-	});
-
-	$(".file-add-tab").click(function() {
-		var ret = prompt("追加するファイル名を入力してください。\n拡張子を省略すると.tsがつきます。\ntsをつけないとビルド対象外になります（このPlayGround上では意味の無いファイルになります）。");
-		if (! ret)
-			return;
-		if (! f.addScript(null, null, ret)) {
-			alert("エラー");
-			return;
-		}
-		f.changeScript(null, null, ret);
-	});
-	$(".file-extra-tab").click(function() {
-		var d = [];
-		for (var i=0; i<playground.defines.length; i++) {
-			d.push(playground.defines[i].name);
-		}
-		$("#file-defines").val(d.join("\n"));
-		$("#file-extra-dialog").dialog({
-			width: 600,
-			modal:true,
-			buttons: {
-				"変更する": function() {
-					loading = true;
-					var lines = $("#file-defines").val().split(/\r|\n|\r\n/g);
-					var d = [];
-					var errors = [];
-					defines = new jgeditor.DefineLoader();
-					for (var i=0; i<lines.length; i++) {
-						if (lines[i].trim().length > 0)
-							defines.load(lines[i].trim());
-					}
-					defines.onload = function() {
-						playground.clean(defines.d);
-						loading = false;
-						if (errors.length > 0)
-							alert("以下のファイルの読み込みに失敗しました\n\n"+errors.join("\n"));
-						f.build();
-					}
-					defines.onerror = function(error_define) {
-						errors.push(error_define);
-					}
-					$( this ).dialog( "close" );
-				},
-				"キャンセル": function() {
-					$( this ).dialog( "close" );
-				}
-			}
+	editor.preview = function() {
+		save(function() {
+			editor.run("load.php");
 		});
-	});
-	$(".file-sortable").sortable({
-		update: function() {
-			var arranged = [];
-			$(".file-sortable").find(".file-tab").each(function(index, f) {
-				arranged.push($(f).text());
-			});
-			playground.arrangeScripts(arranged);
-		}
-	});
-	$(".files").disableSelection();
+		return true;
+	}
+	editor.runOnWindow = function() {
+		var w = window.open("about:blank");
+		save(function() {
+			w.location.href = "load.php?"+(new Date()).getTime();
+		});
+		return true;
+	}
 
+	shortcut = new jgeditor.ShortcutManager(editor);
+	shortcut.add("⌘+s,ctrl+s", "check", "型チェック");
+	shortcut.add("⌘+b,ctrl+b", "build", "ビルド");
+	shortcut.add("⌘+r,ctrl+r", "preview", "プレビュー");
+	shortcut.add("⌘+shift+r,ctrl+shift+r", "stopGame", "停止");
+	shortcut.add("⌘+alt+r,ctrl+alt+r", "runOnWindow", "別ウィンドウで実行");
+	shortcut.add("alt+f", "focusGame", "ゲームにフォーカス");
+	shortcut.add("alt+shift+f", "focus", "エディタにフォーカス");
+	shortcut.add("⌘+down,ctrl+down", "changeToNextTab", "次のタブ");
+	shortcut.add("⌘+up,ctrl+up", "changeToPrevTab", "前のタブ");
+	shortcut.add("alt+n", "addTabPrompt", "新規ファイル");
+	shortcut.add("f2", "renameTabPrompt", "ファイル名変更");
+	shortcut.add("⌘+del,ctrl+del", "removeTabConfirm", "ファイル削除");
+	shortcut.add("alt+h", "showHelp", "ヘルプ", shortcut);
+	shortcut.activate();
+
+	editor.activateSortable();
+	editor.activateAddTabUI($(".file-add-tab"), "（tsファイル以外はこのPlayGroundでは機能しません）");
+	editor.activateFileContextMenu();
+	editor.activateSelectDefineDialog(
+		$(".file-extra-tab"),
+		$("#file-extra-dialog"),
+		$("#file-defines")
+	);
+	editor.activateAutoComplete();
+
+	editor.keyhandleForIframe();
 	editor.focus();
-	f.keyhandleForIframe(document.getElementById("jgame-con"));
 }
 })();
 </script>
@@ -651,13 +210,14 @@ window.onload = function() {
 </div>
 <div>
 	<div>
-		<input type="button" value="型チェック(Ctrl+S)" onclick="f.check()" />
-		<input type="button" value="ビルド(Ctrl+B)" onclick="f.build()" />
-		<input type="button" value="実行(Ctrl+R)" onclick="f.run()" />
-		<input type="button" value="停止(Ctrl+Shift+R)" onclick="f.stop()" />
-		<input type="button" value="フォーカス" onclick="f.focus()" />
-		<input type="button" value="別ウィンドウで実行" onclick="f.run_window()" />
-		<input id="zip-button" type="button" value="ZIP生成" onclick="f.zip(document.getElementById('zip-button'))" />
+		<input type="button" value="型チェック" onclick="editor.check()" title="Ctrl+S" />
+		<input type="button" value="ビルド" onclick="editor.build()" title="Ctrl+B" />
+		<input type="button" value="実行" onclick="editor.run()" title="Ctrl+R" />
+		<input type="button" value="停止" onclick="editor.stop()" title="Ctrl+Shift+R" />
+		<input type="button" value="フォーカス" onclick="editor.focus()" title="Alt+F" />
+		<input type="button" value="別ウィンドウで実行" onclick="editor.runOnwindow()" title="Ctrl+Alt+R" />
+		<input id="zip-button" type="button" value="ZIP生成" onclick="editor.zip(document.getElementById('zip-button'))" />
+		<input type="button" value="ヘルプ" onclick="shortcut.showHelp()" title="Alt+H"/>
 	</div>
 	<div>
 		<span>Ctrl+Spaceで入力ヒントを表示</span>

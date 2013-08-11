@@ -6,10 +6,14 @@ module jgeditor {
 		defines: DefineFile[];
 		beforeCharIndex: number;
 
-		constructor(defines: DefineFile[], initScript?: string) {
-			this.clean(defines);
-			this.addScript(jgeditor.file, initScript);
-			this.changeScript(jgeditor.file);
+		constructor(defines?: DefineFile[], initScript?: string) {
+			if (defines)
+				this.clean(defines);
+
+			if (initScript) {
+				this.addScript(jgeditor.file, initScript);
+				this.changeScript(jgeditor.file);
+			}
 		}
 
 		getScriptNames():string[] {
