@@ -15,6 +15,8 @@ module jgeditor {
 		_changing_script: boolean;
 		messages: IEditorMessages;
 		activated_contextmenu: boolean;
+		changed_handler: Function;
+		is_changed: boolean;
 
 		tab_rename: jg.Trigger;
 		tab_renamed: jg.Trigger;
@@ -24,6 +26,7 @@ module jgeditor {
 		tab_changed: jg.Trigger;
 		tab_add: jg.Trigger;
 		tab_added: jg.Trigger;
+		changed: jg.Trigger;
 
 		zip_start: jg.Trigger;
 		zip_ended: jg.Trigger;
@@ -58,6 +61,7 @@ module jgeditor {
 			this.zip_start = new jg.Trigger();
 			this.zip_ended = new jg.Trigger();
 			this.sorted = new jg.Trigger();
+			this.changed = new jg.Trigger();
 
 			this.run_start = new jg.Trigger();
 			this.run_end = new jg.Trigger();
@@ -250,6 +254,15 @@ module jgeditor {
 			add_tab_btn.click(jg.JGUtil.proxy(this.addTabPrompt, this));
 		}
 
+		activateChangedHandler() {
+			if (! this.changed_handler)
+				this.changed_handler = jg.JGUtil.proxy(this.changedHandler, this);
+			this.is_changed = false;
+			this.clearInfo("file-changed-info");
+			this.editor.removeEventListener("change", this.changed_handler);
+			this.editor.addEventListener("change", this.changed_handler);
+		}
+
 		removeTabConfirm(target?: string) {
 			if (target === undefined)
 				target = this.currentTab();
@@ -392,6 +405,9 @@ module jgeditor {
 				div["contextMenu"]("file-menu", { bindings: this.menu_binder});
 			this.file_sortable.append(div);
 
+			if (this.changed_handler)
+				this.onChange();
+
 			this.tab_added.fire({
 				name: evt.name,
 				value: evt.value
@@ -421,6 +437,10 @@ module jgeditor {
 			this.ace_session.rename(evt.name, evt.newName);
 
 			target.text(evt.newName);
+
+			if (this.changed_handler)
+				this.onChange();
+
 			this.tab_renamed.fire({
 				name: evt.name,
 				newName: evt.newName
@@ -447,19 +467,53 @@ module jgeditor {
 
 			this.ace_session.remove(evt.name)
 
+			if (this.changed_handler)
+				this.onChange();
+
 			this.tab_removed.fire({
 				name: evt.name
 			});
 		}
 
-		addInfo(text:string, background:string) {
-			this.file_sortable.parent().find(".c").before(
-				$("<div/>").addClass("file-info").text(text).css("background", background)
-			);
+		addInfo(text:string, background:string, id?:string) {
+			if (id) {
+				var exists = this.file_sortable.find("#"+id);
+				if (exists.length) {
+					exists.text(text).css("background", background);
+					return;
+				}
+			}
+
+			var info = $("<div/>").addClass("file-info").text(text).css("background", background);
+			if (id)
+				info.attr("id", id);
+
+			this.file_sortable.parent().find(".c").before(info);
 		}
 
-		clearInfo() {
-			this.file_sortable.parent().find(".file-info").remove();
+		clearInfo(id?:string) {
+			if (id)
+				this.file_sortable.parent().find(".file-info").filter("#"+id).remove();
+			else
+				this.file_sortable.parent().find(".file-info").remove();
+		}
+
+		onChange() {
+			if (! this.is_changed) {
+				this.is_changed = true;
+				this.addInfo("変更有", "#f42", "file-changed-info");
+				this.editor.removeEventListener("change", this.changedHandler);
+			}
+		}
+
+		changedHandler() {
+			var evt = {
+				value: this.editor.getValue(),
+				is_changed: false
+			};
+			this.changed.fire(evt);
+			if (evt.is_changed)
+				this.onChange();
 		}
 
 		_createMessage(mes: string, message_type?:string, extension?:boolean) {

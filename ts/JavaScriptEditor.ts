@@ -19,6 +19,12 @@ module jgeditor {
 			this.tab_renamed.handle(this, this.onTabRenamed);
 			this.zip_start.handle(this, this.onZipStart);
 			this.zip_ended.handle(this, this.onZipEnded);
+			this.changed.handle(this, this.onChanged);
+		}
+
+		onChanged(e:any) {
+			if (e.value != this.current.value)
+				e.is_changed = true;
 		}
 
 		onTabChange(e:any) {

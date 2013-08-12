@@ -25,6 +25,7 @@ module jgeditor {
 			this.tab_renamed.handle(this, this.onTabRenamed);
 			this.zip_start.handle(this, this.onZipStart);
 			this.zip_ended.handle(this, this.onZipEnded);
+			this.changed.handle(this, this.onChanged);
 		}
 
 		loadDefines(...files:string[]) {
@@ -114,6 +115,8 @@ module jgeditor {
 						"変更する": (e) => {
 							var lines = defines.val().split(/\r|\n|\r\n/g);
 							this.loadDefines.apply(this, lines);
+							if (this.changed_handler)
+								this.onChange();
 							dialog["dialog"]( "close" );
 						},
 						"キャンセル": (e) => {
@@ -152,6 +155,11 @@ module jgeditor {
 
 		getScript() {
 			return this.output.val();
+		}
+
+		onChanged(e:any) {
+			if (e.value != this.playground.getScript())
+				e.is_changed = true;
 		}
 
 		onTabChange(e:any) {

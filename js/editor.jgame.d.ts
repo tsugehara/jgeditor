@@ -149,6 +149,8 @@ declare module jgeditor {
         public _changing_script: boolean;
         public messages: jgeditor.IEditorMessages;
         public activated_contextmenu: boolean;
+        public changed_handler: Function;
+        public is_changed: boolean;
         public tab_rename: jg.Trigger;
         public tab_renamed: jg.Trigger;
         public tab_remove: jg.Trigger;
@@ -157,6 +159,7 @@ declare module jgeditor {
         public tab_changed: jg.Trigger;
         public tab_add: jg.Trigger;
         public tab_added: jg.Trigger;
+        public changed: jg.Trigger;
         public zip_start: jg.Trigger;
         public zip_ended: jg.Trigger;
         public sorted: jg.Trigger;
@@ -181,6 +184,7 @@ declare module jgeditor {
         public activateFileContextMenu(): void;
         public activateSortable(file_sortable?: JQuery): void;
         public activateAddTabUI(add_tab_btn: JQuery, ext_message?: string): void;
+        public activateChangedHandler(): void;
         public removeTabConfirm(target?: string): boolean;
         public renameTabPrompt(target?: string): boolean;
         public addTabPrompt(): boolean;
@@ -191,8 +195,10 @@ declare module jgeditor {
         public addTab(name: string, value?: string): boolean;
         public renameTab(name: string, newName: string): void;
         public removeTab(name: string): void;
-        public addInfo(text: string, background: string): void;
-        public clearInfo(): void;
+        public addInfo(text: string, background: string, id?: string): void;
+        public clearInfo(id?: string): void;
+        public onChange(): void;
+        public changedHandler(): void;
         public _createMessage(mes: string, message_type?: string, extension?: boolean): string;
         public _isUniqueName(name: string): boolean;
         public _isValidName(name: string): {};
@@ -209,6 +215,7 @@ declare module jgeditor {
         public scripts: JavaScriptFile[];
         public current: JavaScriptFile;
         constructor(id: string);
+        public onChanged(e: any): void;
         public onTabChange(e: any): void;
         public onTabChanged(e: any): void;
         public onTabAdded(e: any): void;
@@ -241,6 +248,7 @@ declare module jgeditor {
         public activateAutoComplete(): void;
         public updateScript(): void;
         public getScript();
+        public onChanged(e: any): void;
         public onTabChange(e: any): void;
         public onTabChanged(e: any): void;
         public onTabAdded(e: any): void;

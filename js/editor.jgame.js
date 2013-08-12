@@ -630,6 +630,7 @@ var jgeditor;
             this.zip_start = new jg.Trigger();
             this.zip_ended = new jg.Trigger();
             this.sorted = new jg.Trigger();
+            this.changed = new jg.Trigger();
 
             this.run_start = new jg.Trigger();
             this.run_end = new jg.Trigger();
@@ -814,6 +815,15 @@ var jgeditor;
             add_tab_btn.click(jg.JGUtil.proxy(this.addTabPrompt, this));
         };
 
+        Editor.prototype.activateChangedHandler = function () {
+            if (!this.changed_handler)
+                this.changed_handler = jg.JGUtil.proxy(this.changedHandler, this);
+            this.is_changed = false;
+            this.clearInfo("file-changed-info");
+            this.editor.removeEventListener("change", this.changed_handler);
+            this.editor.addEventListener("change", this.changed_handler);
+        };
+
         Editor.prototype.removeTabConfirm = function (target) {
             if (target === undefined)
                 target = this.currentTab();
@@ -957,6 +967,9 @@ var jgeditor;
                 div["contextMenu"]("file-menu", { bindings: this.menu_binder });
             this.file_sortable.append(div);
 
+            if (this.changed_handler)
+                this.onChange();
+
             this.tab_added.fire({
                 name: evt.name,
                 value: evt.value
@@ -986,6 +999,10 @@ var jgeditor;
             this.ace_session.rename(evt.name, evt.newName);
 
             target.text(evt.newName);
+
+            if (this.changed_handler)
+                this.onChange();
+
             this.tab_renamed.fire({
                 name: evt.name,
                 newName: evt.newName
@@ -1012,17 +1029,52 @@ var jgeditor;
 
             this.ace_session.remove(evt.name);
 
+            if (this.changed_handler)
+                this.onChange();
+
             this.tab_removed.fire({
                 name: evt.name
             });
         };
 
-        Editor.prototype.addInfo = function (text, background) {
-            this.file_sortable.parent().find(".c").before($("<div/>").addClass("file-info").text(text).css("background", background));
+        Editor.prototype.addInfo = function (text, background, id) {
+            if (id) {
+                var exists = this.file_sortable.find("#" + id);
+                if (exists.length) {
+                    exists.text(text).css("background", background);
+                    return;
+                }
+            }
+
+            var info = $("<div/>").addClass("file-info").text(text).css("background", background);
+            if (id)
+                info.attr("id", id);
+
+            this.file_sortable.parent().find(".c").before(info);
         };
 
-        Editor.prototype.clearInfo = function () {
-            this.file_sortable.parent().find(".file-info").remove();
+        Editor.prototype.clearInfo = function (id) {
+            if (id)
+                this.file_sortable.parent().find(".file-info").filter("#" + id).remove(); else
+                this.file_sortable.parent().find(".file-info").remove();
+        };
+
+        Editor.prototype.onChange = function () {
+            if (!this.is_changed) {
+                this.is_changed = true;
+                this.addInfo("変更有", "#f42", "file-changed-info");
+                this.editor.removeEventListener("change", this.changedHandler);
+            }
+        };
+
+        Editor.prototype.changedHandler = function () {
+            var evt = {
+                value: this.editor.getValue(),
+                is_changed: false
+            };
+            this.changed.fire(evt);
+            if (evt.is_changed)
+                this.onChange();
         };
 
         Editor.prototype._createMessage = function (mes, message_type, extension) {
@@ -1089,7 +1141,13 @@ var jgeditor;
             this.tab_renamed.handle(this, this.onTabRenamed);
             this.zip_start.handle(this, this.onZipStart);
             this.zip_ended.handle(this, this.onZipEnded);
+            this.changed.handle(this, this.onChanged);
         }
+        JavaScriptEditor.prototype.onChanged = function (e) {
+            if (e.value != this.current.value)
+                e.is_changed = true;
+        };
+
         JavaScriptEditor.prototype.onTabChange = function (e) {
             this.updateScript();
             var i = this.findScript(e.name);
@@ -1194,6 +1252,7 @@ var jgeditor;
             this.tab_renamed.handle(this, this.onTabRenamed);
             this.zip_start.handle(this, this.onZipStart);
             this.zip_ended.handle(this, this.onZipEnded);
+            this.changed.handle(this, this.onChanged);
         }
         TypeScriptEditor.prototype.loadDefines = function () {
             var files = [];
@@ -1288,6 +1347,8 @@ var jgeditor;
                         "変更する": function (e) {
                             var lines = defines.val().split(/\r|\n|\r\n/g);
                             _this.loadDefines.apply(_this, lines);
+                            if (_this.changed_handler)
+                                _this.onChange();
                             dialog["dialog"]("close");
                         },
                         "キャンセル": function (e) {
@@ -1326,6 +1387,11 @@ var jgeditor;
 
         TypeScriptEditor.prototype.getScript = function () {
             return this.output.val();
+        };
+
+        TypeScriptEditor.prototype.onChanged = function (e) {
+            if (e.value != this.playground.getScript())
+                e.is_changed = true;
         };
 
         TypeScriptEditor.prototype.onTabChange = function (e) {

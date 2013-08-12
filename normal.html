@@ -57,12 +57,13 @@ window.onload = function() {
 	editor.define_loaded.handle(function() {
 		editor.clean();
 		if (first) {
+			first = false;
 			editor.addTab("main.ts", editor.getValue());
 			editor.changeTab("main.ts");
-			setTimeout(function() {
-				editor.build();
-			}, 20);
 		}
+		setTimeout(function() {
+			editor.build();
+		}, 20);
 	});
 
 	var save = function(callback, error_callback) {
