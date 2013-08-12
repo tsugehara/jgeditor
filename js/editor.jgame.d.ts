@@ -255,6 +255,7 @@ declare module jgeditor {
         public onTabRemove(e: any): void;
         public onTabRemoved(e: any): void;
         public onTabRenamed(e: any): void;
+        public getRelativeName(name: string): string;
         public onZipStart(e: any): void;
         public onZipEnded(e: any): void;
     }

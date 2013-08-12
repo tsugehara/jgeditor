@@ -87,7 +87,7 @@ module jgeditor {
 					row.text(diagnostic.line + ": "+ diagnostic.message);
 				else
 					row.text(diagnostic.file + " " +diagnostic.line + ": "+ diagnostic.message);
-				row.click(function() {
+				row.click(() => {
 					if (this.playground.current() != diagnostic.file)
 						this.changeTab(diagnostic.file);
 					this.editor.clearSelection();
@@ -191,6 +191,16 @@ module jgeditor {
 			this.playground.renameScript(e.name, e.newName);
 		}
 
+		getRelativeName(name:string) {
+			if (name.substr(0,1) == "/")
+				return name.substr(1);
+			if (name.substr(0,7) == "http://")
+				return name.substr(7);
+			if (name.substr(0,8) == "https://")
+				return name.substr(8);
+			return name;
+		}
+
 		onZipStart(e:any) {
 			this.updateScript();
 
@@ -202,11 +212,12 @@ module jgeditor {
 			build_txt.push("--target ES5");
 			build_txt.push("--out out.js");
 			for (var i=0; i<defines.length; i++) {
+				var n = this.getRelativeName(defines[i].name);
 				e.files.push({
-					name: defines[i].name,
+					name: n,
 					buffer: defines[i].value
 				});
-				build_txt.push(defines[i].name);
+				build_txt.push(n);
 			}
 
 			for (var i=0; i<snapshots.length; i++) {
