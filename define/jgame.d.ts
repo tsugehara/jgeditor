@@ -90,8 +90,16 @@ declare module jg {
     * Shapeの描画スタイル。塗りつぶす(Fill)か線(Stroke)かを指定。
     */
     enum ShapeStyle {
+        /** 未定義 */
         Unknown,
+        /**
+        * 線を描画
+        */
         Stroke,
+        /**
+        *
+        塗りつぶして描画
+        */
         Fill,
     }
     /**
@@ -147,11 +155,7 @@ declare module jg {
 * windowインターフェースの拡張
 */
 interface Window {
-    mozRequestAnimationFrame(): number;
-    webkitRequestAnimationFrame(): number;
     createCanvas(width: number, height: number): HTMLCanvasElement;
-    requestAnimationFrame(callback: FrameRequestCallback): number;
-    msRequestAnimationFrame(callback: FrameRequestCallback): number;
 }
 declare module jg {
     /**
@@ -195,6 +199,14 @@ declare module jg {
     }
 }
 declare module jg {
+    /**
+    * ============================================================================================
+    * Easing Equations v2.0
+    * September 1, 2003
+    * (c) 2003 Robert Penner, all rights reserved.
+    * This work is subject to the terms in http://www.robertpenner.com/easing_terms_of_use.html.
+    * ============================================================================================
+    */
     /**
     * イージング関数ライブラリ
     * enchant.jsプロジェクトで
@@ -365,7 +377,7 @@ declare module jg {
         /** 描画オプション。詳細はIEntityOptionsなどを参照 */
         public options: Object;
         /** このEntityの子Entityを描画する際に利用する描画順制御関数 */
-        public orderDraw: Function;
+        public orderDraw: (target: E) => void;
         /** フィルタ */
         public filter: jg.ImageFilter.FilterChain;
         /** スクロール座標 */
@@ -3253,7 +3265,7 @@ declare module jg {
         * 下記のようにLayerなどに指定すると、描画順を変更できる。
         * game.scene.root.orderDraw = JGUtil.orderDrawY;
         */
-        static orderDrawY(): void;
+        static orderDrawY(target: jg.E): void;
         /**
         * 線形グラデーションを作成する。ここで作成したグラデーションは、Shapeの色などに用いることが出来る。
         * @param rect グラデーションの範囲を指定。Rectangleクラス、またはjsの場合は4つの引数に分けてもよい。引数を4つにけると、colorsが第五引数、offsetsが第六引数となる
