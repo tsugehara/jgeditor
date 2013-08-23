@@ -5,7 +5,6 @@ var jg;
         Angle[Angle["Left"] = 1] = "Left";
         Angle[Angle["Right"] = 2] = "Right";
         Angle[Angle["Up"] = 3] = "Up";
-
         Angle[Angle["Down"] = 4] = "Down";
     })(jg.Angle || (jg.Angle = {}));
     var Angle = jg.Angle;
@@ -14,7 +13,6 @@ var jg;
         RenderTransferMode[RenderTransferMode["Unknown"] = 0] = "Unknown";
         RenderTransferMode[RenderTransferMode["Transfer"] = 1] = "Transfer";
         RenderTransferMode[RenderTransferMode["Flip"] = 2] = "Flip";
-
         RenderTransferMode[RenderTransferMode["Direct"] = 3] = "Direct";
     })(jg.RenderTransferMode || (jg.RenderTransferMode = {}));
     var RenderTransferMode = jg.RenderTransferMode;
@@ -22,7 +20,6 @@ var jg;
     (function (InputEventType) {
         InputEventType[InputEventType["Unknown"] = 0] = "Unknown";
         InputEventType[InputEventType["Keyboard"] = 1] = "Keyboard";
-
         InputEventType[InputEventType["Point"] = 2] = "Point";
     })(jg.InputEventType || (jg.InputEventType = {}));
     var InputEventType = jg.InputEventType;
@@ -31,7 +28,6 @@ var jg;
         InputEventAction[InputEventAction["Unknown"] = 0] = "Unknown";
         InputEventAction[InputEventAction["Down"] = 1] = "Down";
         InputEventAction[InputEventAction["Move"] = 2] = "Move";
-
         InputEventAction[InputEventAction["Up"] = 3] = "Up";
     })(jg.InputEventAction || (jg.InputEventAction = {}));
     var InputEventAction = jg.InputEventAction;
@@ -43,7 +39,6 @@ var jg;
         Keytype[Keytype["Up"] = 3] = "Up";
         Keytype[Keytype["Down"] = 4] = "Down";
         Keytype[Keytype["Enter"] = 5] = "Enter";
-
         Keytype[Keytype["Esc"] = 6] = "Esc";
     })(jg.Keytype || (jg.Keytype = {}));
     var Keytype = jg.Keytype;
@@ -60,7 +55,6 @@ var jg;
     (function (ShapeType) {
         ShapeType[ShapeType["Unknown"] = 0] = "Unknown";
         ShapeType[ShapeType["Rect"] = 1] = "Rect";
-
         ShapeType[ShapeType["Arc"] = 2] = "Arc";
     })(jg.ShapeType || (jg.ShapeType = {}));
     var ShapeType = jg.ShapeType;
@@ -99,23 +93,24 @@ var jg;
         EffectType[EffectType["BoxInWhite"] = 30] = "BoxInWhite";
         EffectType[EffectType["BoxIn45White"] = 31] = "BoxIn45White";
         EffectType[EffectType["ArcOutWhite"] = 32] = "ArcOutWhite";
-
         EffectType[EffectType["ArcInWhite"] = 33] = "ArcInWhite";
     })(jg.EffectType || (jg.EffectType = {}));
     var EffectType = jg.EffectType;
 })(jg || (jg = {}));
-window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame || ((function () {
-    var lastTime = Date.now ? Date.now() : new Date().getTime();
-    var frame = 1000 / 60;
-    return function (func) {
-        var currentTime = Date.now ? Date.now() : new Date().getTime();
-        var _id = setTimeout(function () {
-            func(Date.now ? Date.now() : new Date().getTime());
-        }, Math.max(0, lastTime + frame - currentTime));
-        lastTime = currentTime;
-        return _id;
-    };
-})());
+if (!window.requestAnimationFrame) {
+    window.requestAnimationFrame = window["mozRequestAnimationFrame"] || window["webkitRequestAnimationFrame"] || window["msRequestAnimationFrame"] || ((function () {
+        var lastTime = Date.now ? Date.now() : new Date().getTime();
+        var frame = 1000 / 60;
+        return function (func) {
+            var currentTime = Date.now ? Date.now() : new Date().getTime();
+            var _id = setTimeout(function () {
+                func(Date.now ? Date.now() : new Date().getTime());
+            }, Math.max(0, lastTime + frame - currentTime));
+            lastTime = currentTime;
+            return _id;
+        };
+    })());
+}
 
 window.createCanvas = function (width, height) {
     var canvas = document.createElement("canvas");
@@ -158,11 +153,13 @@ var jg;
 
         Rectangle.prototype.fit = function (point) {
             if (point.y < this.top)
-                point.y = this.top; else if (point.y > this.bottom)
+                point.y = this.top;
+else if (point.y > this.bottom)
                 point.y = this.bottom;
 
             if (point.x < this.left)
-                point.x = this.left; else if (point.x > this.right)
+                point.x = this.left;
+else if (point.x > this.right)
                 point.x = this.right;
         };
 
@@ -550,7 +547,8 @@ var jg;
 
         E.prototype.remove = function () {
             if (this.parent)
-                this.parent.removeChild(this); else
+                this.parent.removeChild(this);
+else
                 throw "Can not remove layer. (use scene.deleteLayer)";
         };
 
@@ -608,7 +606,8 @@ var jg;
                 return;
             this.started = true;
             if (this.scene)
-                this.scene.game.update.handle(this, this.update); else
+                this.scene.game.update.handle(this, this.update);
+else
                 this.addActiveQueue(function () {
                     this.scene.game.update.handle(this, this.update);
                 });
@@ -619,7 +618,8 @@ var jg;
                 return;
             this.started = false;
             if (this.scene)
-                this.scene.game.update.remove(this, this.update); else
+                this.scene.game.update.remove(this, this.update);
+else
                 this.addActiveQueue(function () {
                     this.scene.game.update.remove(this, this.update);
                 });
@@ -627,7 +627,8 @@ var jg;
 
         E.prototype.startTimer = function (wait, method) {
             if (this.scene)
-                this.scene.game.addTimer(wait, this, method ? method : this.interval); else
+                this.scene.game.addTimer(wait, this, method ? method : this.interval);
+else
                 this.addActiveQueue(function () {
                     this.scene.game.addTimer(wait, this, method ? method : this.interval);
                 });
@@ -635,7 +636,8 @@ var jg;
 
         E.prototype.stopTimer = function (wait, method) {
             if (this.scene)
-                this.scene.game.removeTimer(wait, this, method ? method : this.interval); else
+                this.scene.game.removeTimer(wait, this, method ? method : this.interval);
+else
                 this.addActiveQueue(function () {
                     this.scene.game.removeTimer(wait, this, method ? method : this.interval);
                 });
@@ -798,7 +800,8 @@ var jg;
         Shape.prototype.setClip = function (value) {
             this.clip = value;
             if (this.clip)
-                this.disableTransform = true; else
+                this.disableTransform = true;
+else
                 delete this.disableTransform;
         };
 
@@ -817,13 +820,15 @@ var jg;
 
         Shape.prototype.setColor = function (color) {
             if (this.style == jg.ShapeStyle.Stroke)
-                this.setDrawOption("strokeStyle", color); else
+                this.setDrawOption("strokeStyle", color);
+else
                 this.setDrawOption("fillStyle", color);
         };
 
         Shape.prototype.getColor = function () {
             if (this.style == jg.ShapeStyle.Stroke)
-                return this.getDrawOption("strokeStyle"); else
+                return this.getDrawOption("strokeStyle");
+else
                 return this.getDrawOption("filltyle");
         };
 
@@ -856,7 +861,8 @@ var jg;
                 context.restore();
                 context.clip();
             } else if (this.style == jg.ShapeStyle.Fill)
-                context.fill(); else
+                context.fill();
+else
                 context.stroke();
         };
         Shape.PI_200_PER = Math.PI * 2;
@@ -872,13 +878,15 @@ var jg;
         }
         Trigger.prototype.handleInsert = function (index, owner, handler) {
             if (!handler)
-                this.handlers.splice(index, 0, { owner: window, handler: owner }); else
+                this.handlers.splice(index, 0, { owner: window, handler: owner });
+else
                 this.handlers.splice(index, 0, { owner: owner, handler: handler });
         };
 
         Trigger.prototype.handle = function (owner, handler) {
             if (!handler)
-                this.handlers.push({ owner: window, handler: owner }); else
+                this.handlers.push({ owner: window, handler: owner });
+else
                 this.handlers.push({ owner: owner, handler: handler });
         };
 
@@ -1043,7 +1051,8 @@ var jg;
 
         ImageResourceLoader.prototype.completed = function (name, image, is_success) {
             if (!is_success)
-                console.log("error: " + name); else
+                console.log("error: " + name);
+else
                 this.resource.images[name] = image;
 
             this.resource.requestCompleted(name);
@@ -1087,7 +1096,8 @@ var jg;
 
         ScriptResourceLoader.prototype.completed = function (name, script, is_success) {
             if (!is_success)
-                console.log("error: " + name); else
+                console.log("error: " + name);
+else
                 this.resource.scripts[name] = script;
 
             this.resource.requestCompleted(name);
@@ -1118,7 +1128,8 @@ var jg;
 
         SoundResourceLoader.prototype.completed = function (name, audio, is_success) {
             if (!is_success)
-                console.log("error: " + name); else
+                console.log("error: " + name);
+else
                 this.resource.sounds[name] = audio;
 
             this.resource.requestCompleted(name);
@@ -1185,7 +1196,8 @@ var jg;
             var dot = url.split(/\./g);
             var ext;
             if (dot.length == 0)
-                ext = ""; else
+                ext = "";
+else
                 ext = dot[dot.length - 1];
 
             ext = ext.toLowerCase();
@@ -1283,7 +1295,8 @@ var jg;
 
             var linkMode = this.currentMode();
             if (newMode !== undefined && newMode != newMode)
-                this.changeMode(newMode); else if (linkMode && this[linkMode + "Show"])
+                this.changeMode(newMode);
+else if (linkMode && this[linkMode + "Show"])
                 this[linkMode + "Show"]();
         };
 
@@ -1363,7 +1376,8 @@ var jg;
 
         Scene.prototype.append = function (entity, layerName) {
             if (!layerName)
-                this.root.append(entity); else
+                this.root.append(entity);
+else
                 this.layers[layerName].append(entity);
         };
 
@@ -1745,7 +1759,8 @@ var jg;
             if (this.syncObj) {
                 var val;
                 if (typeof this.syncObj[this.syncProp] == "function")
-                    val = this.syncObj[this.syncProp](this); else
+                    val = this.syncObj[this.syncProp](this);
+else
                     val = this.syncObj[this.syncProp];
 
                 this.text = this.syncRound ? Math.round(val) : val;
@@ -1812,7 +1827,8 @@ var jg;
             this.width = size.width;
             this.height = size.height;
             if (offset)
-                this.moveTo(offset.x, offset.y); else
+                this.moveTo(offset.x, offset.y);
+else
                 this.moveTo(0, 0);
 
             this.defaultStyle = "#000";
@@ -1878,7 +1894,8 @@ var jg;
             this.lines = [];
 
             if (this.bufferBg)
-                c.putImageData(this.bufferBg, 0, 0); else
+                c.putImageData(this.bufferBg, 0, 0);
+else
                 c.clearRect(0, 0, this.width, this.height);
 
             c.fillStyle = this.defaultStyle;
@@ -1944,7 +1961,8 @@ var jg;
             this.sprite = new jg.Sprite(this.buffer);
             this.sprite.moveTo(0, 0);
             if (this.entities.length == 1)
-                this.entities.push(this.sprite); else
+                this.entities.push(this.sprite);
+else
                 this.entities[1] = this.sprite;
 
             return offset == len ? -1 : offset;
@@ -2478,7 +2496,7 @@ var jg;
 
         Renderer.prototype.renderParent = function (parent, c) {
             if (parent.orderDraw)
-                parent.orderDraw();
+                parent.orderDraw(parent);
 
             c.save();
             if (parent.opacity != 1)
@@ -2553,7 +2571,8 @@ var jg;
         Renderer.prototype.useDrawOption = function (entity, c) {
             for (var p in entity.options) {
                 if (this.drawOptionFunctions[p])
-                    this.drawOptionFunctions[p].call(this, c, entity, entity.options[p]); else {
+                    this.drawOptionFunctions[p].call(this, c, entity, entity.options[p]);
+else {
                     c[p] = entity.options[p];
                 }
             }
@@ -2874,7 +2893,8 @@ var jg;
             var container, transferMode;
             for (var i = 2; i < arguments.length; i++) {
                 if (arguments[i] instanceof HTMLElement)
-                    container = arguments[i]; else if (typeof arguments[i] == "string") {
+                    container = arguments[i];
+else if (typeof arguments[i] == "string") {
                     this.renderer = new window[arguments[i]](this, container, transferMode);
                     this.renderer.changeScene(this.scene);
                 } else
@@ -3228,7 +3248,8 @@ var jg;
         Game.prototype.setLoadingScene = function (scene) {
             if (!this.loadingScene) {
                 if (scene instanceof jg.LoadingScene)
-                    this.loadingScene = scene; else
+                    this.loadingScene = scene;
+else
                     this.loadingScene = new scene(this, this.resource);
 
                 this.loadingScene.finished.handle(this, this.preloadComplete);
@@ -3287,8 +3308,10 @@ var jg;
                     this[n].fire(e);
                 } else {
                     if (e.action == jg.InputEventAction.Down)
-                        this.setPointingEntity(e); else if (!this.dragParam)
-                        continue; else
+                        this.setPointingEntity(e);
+else if (!this.dragParam)
+                        continue;
+else
                         (e).set(this.dragParam.entity);
 
                     if ((e).entity && (e).entity[n])
@@ -3354,9 +3377,12 @@ var jg;
         Game.prototype.fullscreen = function () {
             var t = this.renderer.container;
             if (t["requestFullScreen"])
-                t["requestFullScreen"](); else if (t["webkitRequestFullScreen"])
-                t["webkitRequestFullScreen"](); else if (t["mozRequestFullScreen"])
-                t["mozRequestFullScreen"](); else
+                t["requestFullScreen"]();
+else if (t["webkitRequestFullScreen"])
+                t["webkitRequestFullScreen"]();
+else if (t["mozRequestFullScreen"])
+                t["mozRequestFullScreen"]();
+else
                 return false;
             return true;
         };
@@ -3364,9 +3390,12 @@ var jg;
         Game.prototype.exitFullscreen = function () {
             var t = this.renderer.container;
             if (t["exitFullscreen"])
-                t["exitFullscreen"](); else if (t["webkitCancelFullScreen"])
-                t["webkitCancelFullScreen"](); else if (t["mozCancelFullScreen"])
-                t["mozCancelFullScreen"](); else
+                t["exitFullscreen"]();
+else if (t["webkitCancelFullScreen"])
+                t["webkitCancelFullScreen"]();
+else if (t["mozCancelFullScreen"])
+                t["mozCancelFullScreen"]();
+else
                 return false;
             return true;
         };
@@ -3520,7 +3549,8 @@ var jg;
 
             Filter.prototype.checkRGBBoundary = function (val) {
                 if (val < 0)
-                    return 0; else if (val > 255)
+                    return 0;
+else if (val > 255)
                     return 255;
 
                 return val;
@@ -3572,7 +3602,8 @@ var jg;
                 var enableCount = 0;
                 for (var i = 0, len = a.length; i < len; i += 4) {
                     if (a[i] == b[i] && a[i + 1] == b[i + 1] && a[i + 2] == b[i + 2] && a[i + 3] == b[i + 3])
-                        mask[i] = 1; else
+                        mask[i] = 1;
+else
                         mask[i] = 0;
                 }
                 this.mask = mask;
@@ -3992,7 +4023,6 @@ var jg;
 
         (function (NoiseType) {
             NoiseType[NoiseType["Mono"] = 0] = "Mono";
-
             NoiseType[NoiseType["Color"] = 1] = "Color";
         })(ImageFilter.NoiseType || (ImageFilter.NoiseType = {}));
         var NoiseType = ImageFilter.NoiseType;
@@ -4251,7 +4281,8 @@ var jg;
                     this.old[prop] = {};
                     for (var j in this.props[prop]) {
                         if (typeof this.props[prop][j] === "function")
-                            this.target[prop][j] = this.props[prop][j].call(this.entity); else
+                            this.target[prop][j] = this.props[prop][j].call(this.entity);
+else
                             this.target[prop][j] = this.props[prop][j];
                         this.origin[prop][j] = this.entity[prop][j];
                         this.old[prop][j] = this.entity[prop][j];
@@ -4261,11 +4292,13 @@ var jg;
                 }
 
                 if (typeof this.props[prop] === "function")
-                    this.target[prop] = this.props[prop].call(this.entity); else
+                    this.target[prop] = this.props[prop].call(this.entity);
+else
                     this.target[prop] = this.props[prop];
 
                 if (jg.TWEEN_DRAW_OPTION_SETTERS[prop])
-                    this.origin[prop] = this.entity.getDrawOption(prop); else
+                    this.origin[prop] = this.entity.getDrawOption(prop);
+else
                     this.origin[prop] = this.entity[prop];
 
                 this.old[prop] = this.origin[prop];
@@ -4363,7 +4396,8 @@ var jg;
             if (force || this._activated) {
                 this._activated = false;
                 if (this.entity.scene)
-                    this.entity.scene.game.update.remove(this, this.tick); else
+                    this.entity.scene.game.update.remove(this, this.tick);
+else
                     this.entity.addActiveQueue(function () {
                         _this.entity.scene.game.update.remove(_this, _this.tick);
                     });
@@ -4374,7 +4408,8 @@ var jg;
             var _this = this;
             if (force || (!this._activated && !this.paused)) {
                 if (this.entity.scene)
-                    this.entity.scene.game.update.handle(this, this.tick); else
+                    this.entity.scene.game.update.handle(this, this.tick);
+else
                     this.entity.addActiveQueue(function () {
                         _this.entity.scene.game.update.handle(_this, _this.tick);
                     });
@@ -4854,7 +4889,6 @@ var jg;
             for (var _i = 0; _i < (arguments.length - 0); _i++) {
                 games[_i] = arguments[_i + 0];
             }
-            var _this = this;
             games.forEach(function (game) {
                 game.renderer.handler.addEventListener("focus", JGUtil.proxy(function () {
                     this.resume();
@@ -4869,7 +4903,8 @@ var jg;
                         game.loaded.remove(this, initEnd);
                     };
                     if (game.scene instanceof jg.LoadingScene)
-                        game.loaded.handle(game, initEnd); else
+                        game.loaded.handle(game, initEnd);
+else
                         initEnd.call(game);
                 }
             });
@@ -4940,10 +4975,12 @@ var jg;
             if (maxMove) {
                 if (absx > maxMove || absy > maxMove) {
                     if (ret.x < 0)
-                        ret.x = -maxMove * xper; else
+                        ret.x = -maxMove * xper;
+else
                         ret.x = maxMove * xper;
                     if (ret.y < 0)
-                        ret.y = -maxMove * yper; else
+                        ret.y = -maxMove * yper;
+else
                         ret.y = maxMove * yper;
                 }
             }
@@ -4960,7 +4997,8 @@ var jg;
                 return null;
 
             if (xp > yp)
-                return (_p1.x > _p2.x) ? jg.Angle.Left : jg.Angle.Right; else
+                return (_p1.x > _p2.x) ? jg.Angle.Left : jg.Angle.Right;
+else
                 return (_p1.y > _p2.y) ? jg.Angle.Up : jg.Angle.Down;
         };
 
@@ -4974,7 +5012,8 @@ var jg;
                 return null;
 
             if (xp > yp)
-                return (_p1.x > _p2.x) ? jg.Keytype.Left : jg.Keytype.Right; else
+                return (_p1.x > _p2.x) ? jg.Keytype.Left : jg.Keytype.Right;
+else
                 return (_p1.y > _p2.y) ? jg.Keytype.Up : jg.Keytype.Down;
         };
 
@@ -5033,32 +5072,36 @@ var jg;
             if (p1.x > p.x) {
                 p1.x -= speed * t;
                 if (p1.x < p.x)
-                    p1.x = p.x; else
+                    p1.x = p.x;
+else
                     xng = true;
             } else if (p1.x < p.x) {
                 p1.x += speed * t;
                 if (p1.x > p.x)
-                    p1.x = p.x; else
+                    p1.x = p.x;
+else
                     xng = true;
             }
 
             if (p1.y > p.y) {
                 p1.y -= speed * t;
                 if (p1.y < p.y)
-                    p1.y = p.y; else
+                    p1.y = p.y;
+else
                     yng = true;
             } else if (p1.y < p.y) {
                 p1.y += speed * t;
                 if (p1.y > p.y)
-                    p1.y = p.y; else
+                    p1.y = p.y;
+else
                     yng = true;
             }
 
             return xng || yng ? false : true;
         };
 
-        JGUtil.orderDrawY = function () {
-            var e = this.entities, len = e.length;
+        JGUtil.orderDrawY = function (target) {
+            var e = target.entities, len = e.length;
             for (var i = 1; i < len; i++) {
                 for (var j = i; j > 0; j--) {
                     if (e[j].y >= e[j - 1].y)
@@ -5160,7 +5203,8 @@ var jg;
             }
 
             if (ret.chrome)
-                ret.webkit = true; else if (ret.webkit)
+                ret.webkit = true;
+else if (ret.webkit)
                 ret.safari = true;
 
             JGUtil.browser = ret;
@@ -5170,7 +5214,8 @@ var jg;
 
         JGUtil.setCrispEdges = function (game, crispEdges) {
             if (crispEdges)
-                window["imageSmoothingEnabled"] = crispEdges; else
+                window["imageSmoothingEnabled"] = crispEdges;
+else
                 delete window["imageSmoothingEnabled"];
             game.refresh();
         };
@@ -5269,7 +5314,8 @@ var jg;
         Line.prototype.setClip = function (value) {
             this.clip = value;
             if (this.clip)
-                this.disableTransform = true; else
+                this.disableTransform = true;
+else
                 delete this.disableTransform;
         };
 
@@ -5280,10 +5326,12 @@ var jg;
                 var x = this.p[0].x + this.p[i].x;
                 var y = this.p[0].y + this.p[i].y;
                 if (min.x > x)
-                    min.x = x; else if (max.x < x)
+                    min.x = x;
+else if (max.x < x)
                     max.x = x;
                 if (min.y > y)
-                    min.y = y; else if (max.y < y)
+                    min.y = y;
+else if (max.y < y)
                     max.y = y;
             }
             this.width = max.x - min.x;
@@ -5746,7 +5794,8 @@ var jg;
             }
 
             if (rotate)
-                sp.tl().resizeTo(this.game.width * 2, this.game.height * 2, t).and().moveTo(-this.game.width / 2, -this.game.height / 2, t); else
+                sp.tl().resizeTo(this.game.width * 2, this.game.height * 2, t).and().moveTo(-this.game.width / 2, -this.game.height / 2, t);
+else
                 sp.tl().resizeTo(this.game.width, this.game.height, t).and().moveTo(0, 0, t);
             sp.tl().then(function () {
                 _this.effected.fire();
@@ -5920,7 +5969,7 @@ var jg;
 
         UIWindow.prototype.createBgImage = function (e, srcPadding, buf) {
             if (!buf)
-                var buf = new jg.BufferedRenderer(e);
+                var buf = new BufferedRenderer(e);
             if (srcPadding === undefined)
                 srcPadding = this.padding;
             buf.renderUnit(e);
@@ -6112,13 +6161,15 @@ var jg;
 
         MessageWindow.prototype.hide = function (fade) {
             if (fade)
-                this.tl().fadeOut(200); else
+                this.tl().fadeOut(200);
+else
                 _super.prototype.hide.call(this);
         };
 
         MessageWindow.prototype.show = function (fade) {
             if (fade)
-                this.tl().fadeIn(200); else
+                this.tl().fadeIn(200);
+else
                 _super.prototype.show.call(this);
         };
 
@@ -6201,7 +6252,8 @@ var jg;
                     image = sprite.image;
                 }
                 if (scale)
-                    context.drawImage(image, 0, 0, width, height); else
+                    context.drawImage(image, 0, 0, width, height);
+else
                     context.drawImage(image, 0, 0);
             }
             this.imageData = context.getImageData(0, 0, this.width, this.height);

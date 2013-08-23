@@ -153,6 +153,7 @@ module jgeditor {
 		}
 
 		focusGame() {
+			this.editor.blur();
 			var con = <HTMLIFrameElement>document.getElementById(this.game_container_id);
 			var w = con.contentWindow || con;
 			try {
@@ -171,10 +172,32 @@ module jgeditor {
 			return true;
 		}
 
+		blurGame() {
+			var con = <HTMLIFrameElement>document.getElementById(this.game_container_id);
+			var w = con.contentWindow || con;
+			try {
+				var container = w.document.getElementById("jgame");
+				var childs = container.childNodes;
+				for (var i=0; i<childs.length; i++) {
+					if (childs[i].className == "input-handler") {
+						childs[i].blur();
+						return true;
+					}
+				}
+			} catch(ex) {
+			}
+
+			w.blur();
+			return true;
+		}
+
 		stopGame() {
+			this.blurGame();
 			var con = <HTMLIFrameElement>document.getElementById(this.game_container_id);
 			this.run_stop.fire({url: con.src});
 			con.src = "about:blank";
+			con.onload = () => {
+			}
 			this.focus();
 			return true;
 		}

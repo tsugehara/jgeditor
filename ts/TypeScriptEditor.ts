@@ -25,7 +25,13 @@ module jgeditor {
 			this.tab_renamed.handle(this, this.onTabRenamed);
 			this.zip_start.handle(this, this.onZipStart);
 			this.zip_ended.handle(this, this.onZipEnded);
+			this.sorted.handle(this, this.onSorted);
 			this.changed.handle(this, this.onChanged);
+		}
+
+		onSorted(e:any) {
+			this.playground.arrangeScripts(e.tabs);
+			this.onChange();
 		}
 
 		loadDefines(...files:string[]) {

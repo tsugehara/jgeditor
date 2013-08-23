@@ -81,10 +81,16 @@ declare module jgeditor {
         public getScriptVersion(fileName: string): number;
         public getScriptIsOpen(fileName: string): boolean;
         public getScriptSnapshot(fileName: string): TypeScript.IScriptSnapshot;
+        public getLocalizedDiagnosticMessages();
+        public resolveRelativePath(path: string, directory: string): string;
+        public getScriptByteOrderMark(fileName: string): ByteOrderMark;
+        public fileExists(path: string): boolean;
+        public directoryExists(path: string): boolean;
+        public getParentDirectory(path: string): string;
         public getDiagnosticsObject(): Services.ILanguageServicesDiagnostics;
-        public _getDiagnosticLine(diagnostic: TypeScript.IDiagnostic): number;
-        public getTextDiagnostic(diagnostic: TypeScript.IDiagnostic): string;
-        public getDiagnosticInfo(diagnostic: TypeScript.IDiagnostic): jgeditor.DiagnosticInfo;
+        public _getDiagnosticLine(diagnostic: TypeScript.Diagnostic): number;
+        public getTextDiagnostic(diagnostic: TypeScript.Diagnostic): string;
+        public getDiagnosticInfo(diagnostic: TypeScript.Diagnostic): jgeditor.DiagnosticInfo;
     }
 }
 declare module jgeditor {
@@ -105,7 +111,7 @@ declare module jgeditor {
         public getScript(name?: string): string;
         public changeScript(name: string): void;
         public updateScript(script: string): boolean;
-        public _check(): TypeScript.IDiagnostic[];
+        public _check(): TypeScript.Diagnostic[];
         public check(): string[];
         public checkDetail(): jgeditor.DiagnosticInfo[];
         public checkDetailAll(): jgeditor.DiagnosticInfo[];
@@ -179,6 +185,7 @@ declare module jgeditor {
         public getValue(): string;
         public focus(): boolean;
         public focusGame(): boolean;
+        public blurGame(): boolean;
         public stopGame(): boolean;
         public zip(btn: HTMLElement): void;
         public activateFileContextMenu(): void;
@@ -215,6 +222,7 @@ declare module jgeditor {
         public scripts: JavaScriptFile[];
         public current: JavaScriptFile;
         constructor(id: string);
+        public onSorted(e: any): void;
         public onChanged(e: any): void;
         public onTabChange(e: any): void;
         public onTabChanged(e: any): void;
@@ -238,6 +246,7 @@ declare module jgeditor {
         public auto_complete: any;
         public define_loaded: jg.Trigger;
         constructor(id: string);
+        public onSorted(e: any): void;
         public loadDefines(...files: string[]): void;
         public clean(): void;
         public check(callback?: () => void): void;

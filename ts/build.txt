@@ -1,6 +1,6 @@
-jgame.d.ts
+../../jgame.js/lib/jgame.d.ts
 jquery.d.ts
-tsc-dummy.d.ts
+typescriptServices.d.ts
 jgeditor.ts
 DefineLoader.ts
 JgDiagnostics.ts
@@ -15,6 +15,6 @@ Editor.ts
 JavaScriptEditor.ts
 TypeScriptEditor.ts
 ShortcutManager.ts
---disallowbool
+--removeComments
 --out ../js/editor.jgame.js
 --declaration

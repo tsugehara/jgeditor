@@ -20,6 +20,23 @@ module jgeditor {
 			this.zip_start.handle(this, this.onZipStart);
 			this.zip_ended.handle(this, this.onZipEnded);
 			this.changed.handle(this, this.onChanged);
+			this.sorted.handle(this, this.onSorted);
+		}
+
+		onSorted(e:any) {
+			var tabs:string[] = e.tabs;
+			var new_scripts = [];
+			for (var i=0; i<tabs.length; i++) {
+				for (var j=0; j<this.scripts.length; j++) {
+					if (this.scripts[j].name == tabs[i]) {
+						new_scripts.push(this.scripts[j]);
+						//なんかspliceしない方が速そう
+						break;
+					}
+				}
+			}
+			this.scripts = new_scripts;
+			this.onChange();
 		}
 
 		onChanged(e:any) {

@@ -10,32 +10,31 @@ module jgeditor {
 
 		constructor() {
 			this.settings = new TypeScript.CompilationSettings();
-			this.settings.propagateConstants = false;
-			//this.settings.minWhitespace = true;
-			this.settings.minWhitespace = false;
-			this.settings.emitComments = false;
+			this.settings.propagateEnumConstants = false;
+			this.settings.removeComments = true;
 			this.settings.watch = false;
-			this.settings.exec = false;
-			this.settings.resolve = true;
-			this.settings.disallowBool = true;
-			this.settings.allowAutomaticSemicolonInsertion = true;
-			this.settings.allowModuleKeywordInExternalModuleReference = true;
+			this.settings.noResolve = false;
 
-			//this.settings.useDefaultLib = true;
-			this.settings.useDefaultLib = false;
+			this.settings.allowBool = false;
+			this.settings.allowAutomaticSemicolonInsertion = true;
+			this.settings.allowModuleKeywordInExternalModuleReference = false;
+			this.settings.noImplicitAny = false;
+
+			this.settings.noLib = true;
 			this.settings.codeGenTarget = TypeScript.LanguageVersion.EcmaScript5;
 			this.settings.moduleGenTarget = TypeScript.ModuleGenTarget.Synchronous;
 
-			this.settings.outputOption = "out.js";
+			this.settings.outFileOption = "out.js";
+			this.settings.outDirOption = "";
 			this.settings.mapSourceFiles = false;
-			this.settings.emitFullSourceMapPath = false;
+			this.settings.mapRoot = "";
+			this.settings.sourceRoot = "";
 
 			this.settings.generateDeclarationFiles = false;
+			this.settings.useCaseSensitiveFileResolution = false;
 			this.settings.gatherDiagnostics = false;
-			
 			this.settings.updateTC = false;
-
-			this.settings.implicitAny = false;
+			this.settings.codepage = null;	//TODO
 			
 			this.defines = [];
 			this.defineSnaps = [];
@@ -159,11 +158,36 @@ module jgeditor {
 			return this.snapshots[index];
 		}
 
+		getLocalizedDiagnosticMessages() {
+			return null;
+		}
+
+		resolveRelativePath(path: string, directory: string): string {
+			console.log("resolveRelativePath");
+			return path;
+		}
+
+		getScriptByteOrderMark(fileName: string):ByteOrderMark {
+			return ByteOrderMark.None;
+		}
+
+		fileExists(path: string): boolean {
+			return false;
+		}
+
+		directoryExists(path: string): boolean {
+			return false;
+		}
+
+		getParentDirectory(path: string): string {
+			return null;
+		}
+
 		getDiagnosticsObject(): Services.ILanguageServicesDiagnostics {
 			return this.diagnostics;
 		}
 
-		_getDiagnosticLine(diagnostic: TypeScript.IDiagnostic):number {
+		_getDiagnosticLine(diagnostic: TypeScript.Diagnostic):number {
 			var index = this.findSnapshot(diagnostic.fileName());
 			if (index < 0)
 				return null;
@@ -180,7 +204,7 @@ module jgeditor {
 			return null;
 		}
 
-		getTextDiagnostic(diagnostic: TypeScript.IDiagnostic) {
+		getTextDiagnostic(diagnostic: TypeScript.Diagnostic) {
 			var mes:string[] = [];
 			var lineNumber = this._getDiagnosticLine(diagnostic);
 			if (lineNumber !== null) {
@@ -191,7 +215,7 @@ module jgeditor {
 			return mes.join("");
 		}
 
-		getDiagnosticInfo(diagnostic: TypeScript.IDiagnostic):DiagnosticInfo {
+		getDiagnosticInfo(diagnostic: TypeScript.Diagnostic):DiagnosticInfo {
 			var lineNumber = this._getDiagnosticLine(diagnostic);
 			var info = new DiagnosticInfo(
 				diagnostic.fileName(),
