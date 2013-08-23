@@ -24,7 +24,8 @@ module jgeditor {
 			this.settings.codeGenTarget = TypeScript.LanguageVersion.EcmaScript5;
 			this.settings.moduleGenTarget = TypeScript.ModuleGenTarget.Synchronous;
 
-			this.settings.outFileOption = "out.js";
+			//this.settings.outFileOption = "out.js";
+			this.settings.outFileOption = "";
 			this.settings.outDirOption = "";
 			this.settings.mapSourceFiles = false;
 			this.settings.mapRoot = "";
