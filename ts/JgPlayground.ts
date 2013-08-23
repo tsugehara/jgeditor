@@ -163,7 +163,6 @@ module jgeditor {
 		}
 
 		resolveRelativePath(path: string, directory: string): string {
-			console.log("resolveRelativePath");
 			return path;
 		}
 

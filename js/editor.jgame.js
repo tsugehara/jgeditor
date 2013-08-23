@@ -275,7 +275,6 @@ var jgeditor;
         };
 
         JgPlayground.prototype.resolveRelativePath = function (path, directory) {
-            console.log("resolveRelativePath");
             return path;
         };
 
