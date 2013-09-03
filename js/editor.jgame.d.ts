@@ -207,6 +207,7 @@ declare module jgeditor {
         public onChange(): void;
         public changedHandler(): void;
         public _createMessage(mes: string, message_type?: string, extension?: boolean): string;
+        public _getTab(name: string): JQuery;
         public _isUniqueName(name: string): boolean;
         public _isValidName(name: string): {};
         public _getName(name: string): string;

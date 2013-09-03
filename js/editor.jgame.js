@@ -916,7 +916,7 @@ var jgeditor;
             if (active.text() == name)
                 return false;
 
-            var target = this.file_sortable.find(".file-tab:contains(" + name + ")");
+            var target = this._getTab(name);
             if (target.length == 0)
                 return false;
 
@@ -1039,7 +1039,7 @@ var jgeditor;
             if (evt.cancel)
                 return;
 
-            var target = this.file_sortable.find(".file-tab:contains(" + evt.name + ")");
+            var target = this._getTab(evt.name);
             if (target.length == 0)
                 return;
 
@@ -1065,7 +1065,7 @@ var jgeditor;
             if (evt.cancel)
                 return;
 
-            var target = this.file_sortable.find(".file-tab:contains(" + evt.name + ")");
+            var target = this._getTab(evt.name);
             if (target.length == 0)
                 return;
 
@@ -1133,8 +1133,14 @@ else
             return mes;
         };
 
+        Editor.prototype._getTab = function (name) {
+            return this.file_sortable.find(".file-tab:contains(" + name + ")").filter(function () {
+                return $(this).text() == name;
+            });
+        };
+
         Editor.prototype._isUniqueName = function (name) {
-            return this.file_sortable.find(".file-tab:contains(" + name + ")").length == 0;
+            return this._getTab(name).length == 0;
         };
 
         Editor.prototype._isValidName = function (name) {
@@ -1512,8 +1518,7 @@ else
             var snapshots = this.playground.host.snapshots;
             var defines = this.playground.defines;
             var build_txt = [];
-            build_txt.push("--nolib");
-            build_txt.push("--disallowbool");
+            build_txt.push("--noLib");
             build_txt.push("--target ES5");
             build_txt.push("--out out.js");
             for (var i = 0; i < defines.length; i++) {

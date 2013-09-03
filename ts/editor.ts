@@ -331,7 +331,7 @@ module jgeditor {
 			if (active.text() == name)
 				return false;
 
-			var target = this.file_sortable.find(".file-tab:contains("+name+")");
+			var target = this._getTab(name);
 			if (target.length == 0)
 				return false;
 
@@ -453,7 +453,7 @@ module jgeditor {
 			if (evt.cancel)
 				return;
 
-			var target = this.file_sortable.find(".file-tab:contains("+evt.name+")");
+			var target = this._getTab(evt.name);
 			if (target.length == 0)
 				return;
 
@@ -479,7 +479,7 @@ module jgeditor {
 			if (evt.cancel)
 				return;
 
-			var target = this.file_sortable.find(".file-tab:contains("+evt.name+")");
+			var target = this._getTab(evt.name);
 			if (target.length == 0)
 				return;
 
@@ -547,8 +547,14 @@ module jgeditor {
 			return mes;
 		}
 
+		_getTab(name:string) {
+			return this.file_sortable.find(".file-tab:contains("+name+")").filter(function() {
+				return $(this).text() == name;
+			});
+		}
+
 		_isUniqueName(name:string) {
-			return this.file_sortable.find(".file-tab:contains("+name+")").length == 0;
+			return this._getTab(name).length == 0;
 		}
 
 		_isValidName(name:string) {

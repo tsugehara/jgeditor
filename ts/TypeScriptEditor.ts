@@ -213,8 +213,7 @@ module jgeditor {
 			var snapshots = this.playground.host.snapshots;
 			var defines = this.playground.defines;
 			var build_txt = [];
-			build_txt.push("--nolib");
-			build_txt.push("--disallowbool");
+			build_txt.push("--noLib");
 			build_txt.push("--target ES5");
 			build_txt.push("--out out.js");
 			for (var i=0; i<defines.length; i++) {

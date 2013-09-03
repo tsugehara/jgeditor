@@ -19,9 +19,16 @@ define('autocomplete', ['require', 'exports', 'module', 'ace/keyboard/hash_handl
 		//this.tooltip = new TooltipView(editor, self);
 		var self = this;
 		var onchanged = function(elm) {
-			var detail = playground.getCompilationDetail($(elm).data("name"));
-			$(elm).find(".label-type").text(detail.type ? detail.type : "");
-			self.view.showComment(detail.docComment);
+			var n = $(elm).data("name");
+			if (n && n.length > 0) {
+				try {
+					var detail = playground.getCompilationDetail(n);
+					$(elm).find(".label-type").text(detail.type ? detail.type : "");
+					self.view.showComment(detail.docComment);
+				} catch(ex) {
+					//なんか0.9.1.1からここで妙なエラーが出るようになった
+				}
+			}
 		}
 		this.view.on("changed", onchanged);
 		this.scriptName = script;

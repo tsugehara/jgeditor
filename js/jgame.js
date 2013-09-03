@@ -1294,7 +1294,7 @@ var jg;
                     this[mode + "End"]();
 
             var linkMode = this.currentMode();
-            if (newMode !== undefined && newMode != newMode)
+            if (newMode !== undefined)
                 this.changeMode(newMode);
 else if (linkMode && this[linkMode + "Show"])
                 this[linkMode + "Show"]();
@@ -2882,6 +2882,7 @@ var jg;
             this.pointMove = new jg.Trigger();
             this.keyDown = new jg.Trigger();
             this.keyUp = new jg.Trigger();
+            this.userEvent = new jg.Trigger();
             this.timers = [];
 
             this.scene = new jg.Scene(this);
@@ -3301,6 +3302,11 @@ else
         Game.prototype.raiseInputEvent = function () {
             var e;
             while (e = this.eventQueue.shift()) {
+                if (!this.inputEventMap[e.type]) {
+                    this.userEvent.fire(e);
+                    continue;
+                }
+
                 var n = this.inputEventMap[e.type][e.action];
                 if (e.type == jg.InputEventType.Keyboard) {
                     if (this.scene[n])
@@ -5969,7 +5975,7 @@ var jg;
 
         UIWindow.prototype.createBgImage = function (e, srcPadding, buf) {
             if (!buf)
-                var buf = new BufferedRenderer(e);
+                buf = new jg.BufferedRenderer(e);
             if (srcPadding === undefined)
                 srcPadding = this.padding;
             buf.renderUnit(e);
